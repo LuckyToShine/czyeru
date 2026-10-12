@@ -1,4 +1,4 @@
-# 👋🧩 Lucky Patches
+# 👋🧩 Crazy Erudite Patches
 
 Template repository for Morphe Patches.
 
@@ -10,12 +10,12 @@ Patches for apps I like.
 
 ### How to use these patches
 
-Click here to add these patches to Morphe: https://morphe.software/add-source?github=LuckyToShine/patkot
+Click here to add these patches to Morphe: https://morphe.software/add-source?github=LuckyToShine/czyeru
 
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.6.2](https://github.com/LuckyToShine/patkot/releases/tag/v1.6.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;49 patches total
+> **[v1.6.2](https://github.com/LuckyToShine/czyeru/releases/tag/v1.6.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;49 patches total
 <details open>
 <summary>📦 Sticker.ly&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
 <br>
@@ -148,4 +148,4 @@ See the [Morphe documentation](https://github.com/MorpheApp/morphe-documentation
 
 ## 📜 License
 
-UserXYZ Patches are licensed under the [GNU General Public License v3.0](LICENSE)
+Crazy Erudite Patches are licensed under the [GNU General Public License v3.0](LICENSE)

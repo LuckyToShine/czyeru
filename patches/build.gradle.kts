@@ -2,9 +2,9 @@ group = "app.czyeru"
 
 patches {
     about {
-        name = "Lucky Patches"
+        name = "Crazy Erudite Patches"
         description = "Patches for apps I like"
-        source = "git@github.com:LuckyToShine/patkot.git"
+        source = "git@github.com:LuckyToShine/czyeru.git"
         author = "LuckyToShine"
         contact = "na"
         website = "na"

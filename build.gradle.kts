@@ -1,5 +1,5 @@
 // Root build configuration for morphe-patches-template
-group = "com.luckytoshine.patches"
+group = "app.czyeru"
 
 plugins {
     alias(libs.plugins.android.library) apply false
