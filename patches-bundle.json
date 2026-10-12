@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-11T00:46:25",
-  "description": "## [1.6.1](https://github.com/LuckyToShine/patkot/compare/v1.6.0...v1.6.1) (2026-10-11)\n\n### 🐛 Bug Fixes\n\n* **tiktok:** show Settings entry on 47.2.41 ([8305168](https://github.com/LuckyToShine/patkot/commit/8305168731012752392cf432e2822a1d0fdcdd26))",
-  "download_url": "https://github.com/LuckyToShine/patkot/releases/download/v1.6.1/patches-1.6.1.mpp",
+  "created_at": "2026-10-12T01:17:35",
+  "description": "## [1.6.2](https://github.com/LuckyToShine/patkot/compare/v1.6.1...v1.6.2) (2026-10-12)\n\n### 🐛 Bug Fixes\n\n* **tiktok:** buncha fixes on 47.2.41 ([a125ca9](https://github.com/LuckyToShine/patkot/commit/a125ca95f73e219d60242a58f9f2ef56c53f03b8))\n* **tiktok:** buncha fixes on 47.2.41 ([1d6e79d](https://github.com/LuckyToShine/patkot/commit/1d6e79d7dc64e8280679375d3c20d3a21f4474c4))",
+  "download_url": "https://github.com/LuckyToShine/patkot/releases/download/v1.6.2/patches-1.6.2.mpp",
   "signature_download_url": "",
-  "version": "1.6.1"
+  "version": "1.6.2"
 }

@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/LuckyToShine/patkot/compare/v1.6.1...v1.6.2) (2026-10-12)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** buncha fixes on 47.2.41 ([a125ca9](https://github.com/LuckyToShine/patkot/commit/a125ca95f73e219d60242a58f9f2ef56c53f03b8))
+* **tiktok:** buncha fixes on 47.2.41 ([1d6e79d](https://github.com/LuckyToShine/patkot/commit/1d6e79d7dc64e8280679375d3c20d3a21f4474c4))
+
 ## [1.6.1](https://github.com/LuckyToShine/patkot/compare/v1.6.0...v1.6.1) (2026-10-11)
 
 ### 🐛 Bug Fixes

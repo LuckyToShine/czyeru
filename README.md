@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.6.1](https://github.com/LuckyToShine/patkot/releases/tag/v1.6.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;47 patches total
+> **[v1.6.2](https://github.com/LuckyToShine/patkot/releases/tag/v1.6.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;49 patches total
 <details open>
 <summary>📦 Sticker.ly&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
 <br>
@@ -32,7 +32,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 </details>
 
 <details open>
-<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;42 patches</summary>
+<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;44 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -55,6 +55,8 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Enable Live search](#enable-live-search) | Shows TikTok's search entry in the Live drawer where supported. |  |
 | [Enable non-personalized search](#enable-non-personalized-search) | Uses TikTok's non-personalized search mode instead of its saved account choice. |  |
 | [Enable voice comments](#enable-voice-comments) | Enables TikTok's native voice-comment recording and publishing entry points. |  |
+| [Favorite playlists grid](#favorite-playlists-grid) | Adds an option to show favorite playlists in a 3-column 8pt grid with square covers and the title and video count below. |  |
+| [Favorite playlists search](#favorite-playlists-search) | Adds an option to show a search bar on the favorite playlists page that filters loaded playlists by name. |  |
 | [Feature Gate Lab](#feature-gate-lab) | Adds a menu for viewing and overriding supported TikTok feature flags and configuration values. |  |
 | [Feed filter](#feed-filter) | Hides feed ads, TikTok Shop items, livestreams, stories, photo posts, and videos outside configured view or like ranges. |  |
 | [Feed tab navigation](#feed-tab-navigation) | Controls which loaded top and bottom navigation tabs remain visible, blocks newly added tabs when requested, and can hide the Tako AI bubble. |  |
