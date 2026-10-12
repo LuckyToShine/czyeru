@@ -27,22 +27,18 @@ val feedTabNavigationPatch = bytecodePatch(
             "invoke-static {}, Lapp/czyeru/extension/tiktok/settings/SettingsStatus;->enableFeedNavigation()V",
         )
 
-        TopTabModelListFingerprint.method.let { method ->
-            val returnIndices = method.implementation!!.instructions.withIndex()
-                .filter { it.value.opcode == Opcode.RETURN_OBJECT }
-                .map { it.index }
-
-            returnIndices.asReversed().forEach { returnIndex ->
-                val register = (method.implementation!!.instructions[returnIndex] as OneRegisterInstruction).registerA
-                method.addInstructions(
-                    returnIndex,
-                    """
-                        invoke-static {v$register}, $EXTENSION_CLASS_DESCRIPTOR->filterTopTabs(Ljava/util/List;)Ljava/util/List;
-                        move-result-object v$register
-                    """,
-                )
-            }
-        }
+        // Filter at the point where TikTok stores both top tab lists. The tab strip and
+        // the home ViewPager read the node list (Yd2), so filtering only the protocol
+        // list (K9) left the visible tabs unchanged and misaligned the two lists.
+        TopTabListsWriterFingerprint.method.addInstructions(
+            0,
+            """
+                invoke-static {p2}, $EXTENSION_CLASS_DESCRIPTOR->filterTopTabs(Ljava/util/List;)Ljava/util/List;
+                move-result-object p2
+                invoke-static {p3, p2}, $EXTENSION_CLASS_DESCRIPTOR->filterTopTabProtocols(Ljava/util/List;Ljava/util/List;)Ljava/util/List;
+                move-result-object p3
+            """,
+        )
 
         BottomTabModelListFingerprint.method.let { method ->
             val returnIndices = method.implementation!!.instructions.withIndex()

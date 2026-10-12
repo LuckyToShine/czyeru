@@ -36,6 +36,7 @@ import app.czyeru.extension.tiktok.settings.SettingsStatus;
 import app.czyeru.extension.tiktok.settings.preference.categories.CommentsPreferenceCategory;
 import app.czyeru.extension.tiktok.settings.preference.categories.DebugPreferenceCategory;
 import app.czyeru.extension.tiktok.settings.preference.categories.DownloadsPreferenceCategory;
+import app.czyeru.extension.tiktok.settings.preference.categories.EruditePreferenceCategory;
 import app.czyeru.extension.tiktok.settings.preference.categories.ExtensionPreferenceCategory;
 import app.czyeru.extension.tiktok.settings.preference.categories.FeedFilterPreferenceCategory;
 import app.czyeru.extension.tiktok.settings.preference.categories.FeedNavigationPreferenceCategory;
@@ -59,6 +60,7 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
         REGION("Region spoof", "Change the region TikTok reads."),
         SHARE_SHEET("Share sheet", "Send to, share via app, and video actions."),
         BEHAVIOR("App behavior", "Sharing, playback, and gestures."),
+        ERUDITE("Erudite Patches", "Favorite playlist grid and search."),
         DIAGNOSTICS("Diagnostics", "Logging, crash capture, and report export.");
 
         final String title;
@@ -319,6 +321,13 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
 
         addMenu(screen, Section.BEHAVIOR, SettingsMenuPreference.Icon.BEHAVIOR, countBehaviorSettings());
 
+        if (SettingsStatus.favoritePlaylistGridEnabled || SettingsStatus.favoritePlaylistSearchEnabled) {
+            addMenu(screen, Section.ERUDITE, SettingsMenuPreference.Icon.LAYOUT, countEnabled(
+                    SettingsStatus.favoritePlaylistGridEnabled && Settings.FAVORITE_PLAYLIST_GRID.get(),
+                    SettingsStatus.favoritePlaylistSearchEnabled && Settings.FAVORITE_PLAYLIST_SEARCH.get()
+            ));
+        }
+
         if (FeatureGateLabRuntime.isInstalled()) {
             screen.addPreference(new SettingsMenuPreference(
                     context,
@@ -391,6 +400,9 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
                 break;
             case DIAGNOSTICS:
                 category = new DebugPreferenceCategory(context, screen);
+                break;
+            case ERUDITE:
+                category = new EruditePreferenceCategory(context, screen);
                 break;
             case BEHAVIOR:
             default:

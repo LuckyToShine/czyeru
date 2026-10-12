@@ -76,6 +76,42 @@ public final class NavigationTabsFilter {
         }
     }
 
+    /**
+     * Keeps the top tab protocols whose tag survived {@link #filterTopTabs(List)}.
+     * The protocol list is parallel to the node list, so both must stay aligned.
+     */
+    @SuppressWarnings({"unused", "rawtypes", "unchecked"})
+    public static List<?> filterTopTabProtocols(List<?> protocols, List<?> keptNodes) {
+        try {
+            if (protocols == null || keptNodes == null || !Settings.FEED_NAVIGATION.get()) {
+                return protocols;
+            }
+
+            Set<String> keptTags = new LinkedHashSet<>();
+            for (Object node : keptNodes) {
+                String tag = getTag(node);
+                if (tag != null) {
+                    keptTags.add(tag);
+                }
+            }
+
+            CopyOnWriteArrayList filtered = new CopyOnWriteArrayList();
+            for (Object protocol : protocols) {
+                if (keptTags.contains(getTag(protocol))) {
+                    filtered.add(protocol);
+                }
+            }
+
+            if (filtered.isEmpty()) {
+                return protocols;
+            }
+            return filtered;
+        } catch (Throwable throwable) {
+            Logger.printException(() -> "Feed tab protocol filter failed; returning original protocols", throwable);
+            return protocols;
+        }
+    }
+
     @SuppressWarnings({"unused", "rawtypes", "unchecked"})
     public static List<?> filterBottomTabs(List<?> tabs) {
         try {

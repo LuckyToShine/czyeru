@@ -196,6 +196,9 @@ public class Settings extends BaseSettings {
             false
     );
 
+    public static final BooleanSetting FAVORITE_PLAYLIST_GRID = new BooleanSetting("favorite_playlist_grid", FALSE, true);
+    public static final BooleanSetting FAVORITE_PLAYLIST_SEARCH = new BooleanSetting("favorite_playlist_search", FALSE, true);
+
     static {
         if (!DOWNLOAD_PATHS_MIGRATED.get()) {
             String legacyPath = DOWNLOAD_PATH.get();
