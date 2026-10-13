@@ -6,10 +6,10 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class Video {
-    public List<BitRate> bitRate;
+    public List<BitRate> bitRateList;
     public UrlModel downloadNoWatermarkAddr;
-    public VideoUrlModel h264PlayAddr;
-    public VideoUrlModel playAddr;
+    public VideoUrlModel h264PlayAddrValue;
+    public VideoUrlModel playAddrValue;
 
     public List<BitRate> getRawBitRate() {
         throw new UnsupportedOperationException("Stub");

@@ -9,7 +9,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class FollowFeedList {
-    public List mItems;
+    public List items;
     public int feedType;
     public int hasMore;
     public long cursor;
