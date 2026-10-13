@@ -29,6 +29,19 @@ object Constants {
         )
     )
 
+    val COMPATIBILITY_UVM = Compatibility(
+        name = "Conexión Lince UVM",
+        packageName = "edu.uvmnet.servicio_alumno",
+        apkFileType = ApkFileType.APKM,
+        appIconColor = 0xD7282F,
+        targets = listOf(
+            // The patch edits the compiled JavaScript, so it only matches the bundle of this build.
+            AppTarget(
+                version = "1.0.63"
+            )
+        )
+    )
+
     val COMPATIBILITY_IRIS_GALLERY = Compatibility(
         name = "Iris Gallery",
         packageName = "com.iris.gallery",
