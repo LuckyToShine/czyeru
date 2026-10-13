@@ -1,4 +1,4 @@
-// Root build configuration for morphe-patches-template
+// Root build configuration for czyeru
 group = "app.czyeru"
 
 plugins {

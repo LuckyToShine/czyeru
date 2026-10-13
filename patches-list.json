@@ -1321,7 +1321,7 @@
     },
     {
       "name": "Settings",
-      "description": "Adds the Metra patches settings menu to TikTok. Supports TikTok 47.2.41.",
+      "description": "Adds the Crazy Erudite Patches settings menu to TikTok. Supports TikTok 47.2.41.",
       "default": true,
       "category": null,
       "dependencies": [

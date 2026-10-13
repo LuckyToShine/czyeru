@@ -42,7 +42,7 @@ final class SupportUi {
                 0
         );
         pill.setBackground(new SupportBackgroundDrawable(context, 0, 0, 17));
-        pill.setContentDescription("Support Metra patches");
+        pill.setContentDescription("Support Crazy Erudite Patches");
         pill.setOnClickListener(view -> openSupport());
 
         ImageView heart = new ImageView(context);
