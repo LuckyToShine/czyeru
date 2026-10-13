@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/LuckyToShine/czyeru/compare/v1.6.3...v1.7.0) (2026-10-13)
+
+### ✨ New Features
+
+* **uvm:** add AMOLED dark theme patch for Conexión Lince UVM 1.0.63 ([74c2c92](https://github.com/LuckyToShine/czyeru/commit/74c2c92bcc7f195cb46b5cfa674c89dfc02879a3))
+
 ## [1.6.3](https://github.com/LuckyToShine/czyeru/compare/v1.6.2...v1.6.3) (2026-10-13)
 
 ### 🐛 Bug Fixes

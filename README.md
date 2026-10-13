@@ -15,7 +15,22 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.6.3](https://github.com/LuckyToShine/czyeru/releases/tag/v1.6.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;49 patches total
+> **[v1.7.0](https://github.com/LuckyToShine/czyeru/releases/tag/v1.7.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;50 patches total
+<details open>
+<summary>📦 Conexión Lince UVM&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
+<br>
+
+**🎯 Supported versions:**
+
+| 1.0.63 |
+| :---: |
+
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [AMOLED dark theme](#amoled-dark-theme) | Turns on the dark theme that is inside the app and makes its background black. Text and backgrounds that the app sets by itself are changed too. Pictures are not changed. | • Background color |
+
+</details>
+
 <details open>
 <summary>📦 Sticker.ly&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
 <br>
