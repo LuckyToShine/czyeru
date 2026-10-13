@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "patches": [
     {
       "name": "AMOLED dark theme",
@@ -83,6 +83,33 @@
           }
         }
       ]
+    },
+    {
+      "name": "Allow screenshots",
+      "description": "Lets you take screenshots and screen recordings in the app, for example of your student ID.",
+      "default": true,
+      "category": null,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "edu.uvmnet.servicio_alumno",
+          "name": "Conexión Lince UVM",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#D7282F",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "1.0.63",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
     },
     {
       "name": "Always show publish date",

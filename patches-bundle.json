@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-13T17:16:04",
-  "description": "## [1.7.0](https://github.com/LuckyToShine/czyeru/compare/v1.6.3...v1.7.0) (2026-10-13)\n\n### ✨ New Features\n\n* **uvm:** add AMOLED dark theme patch for Conexión Lince UVM 1.0.63 ([74c2c92](https://github.com/LuckyToShine/czyeru/commit/74c2c92bcc7f195cb46b5cfa674c89dfc02879a3))",
-  "download_url": "https://github.com/LuckyToShine/czyeru/releases/download/v1.7.0/patches-1.7.0.mpp",
+  "created_at": "2026-10-13T18:20:13",
+  "description": "## [1.7.1](https://github.com/LuckyToShine/czyeru/compare/v1.7.0...v1.7.1) (2026-10-13)\n\n### 🐛 Bug Fixes\n\n* **uvm:** fix dark text in the AMOLED theme and add Allow screenshots ([b1912c2](https://github.com/LuckyToShine/czyeru/commit/b1912c2a1cb3e47e3279287a35fa3e7ec08e88fd))",
+  "download_url": "https://github.com/LuckyToShine/czyeru/releases/download/v1.7.1/patches-1.7.1.mpp",
   "signature_download_url": "",
-  "version": "1.7.0"
+  "version": "1.7.1"
 }

@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/LuckyToShine/czyeru/compare/v1.7.0...v1.7.1) (2026-10-13)
+
+### 🐛 Bug Fixes
+
+* **uvm:** fix dark text in the AMOLED theme and add Allow screenshots ([b1912c2](https://github.com/LuckyToShine/czyeru/commit/b1912c2a1cb3e47e3279287a35fa3e7ec08e88fd))
+
 ## [1.7.0](https://github.com/LuckyToShine/czyeru/compare/v1.6.3...v1.7.0) (2026-10-13)
 
 ### ✨ New Features
