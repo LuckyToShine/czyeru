@@ -17,6 +17,7 @@ internal object Tag {
     const val LONG_STRING = 4
     const val SHORT_STRING = 5
     const val BYTE_STRING = 6
+    const val INTEGER = 7
 }
 
 /** Where a string is stored. [length] counts characters, not bytes. */
@@ -29,8 +30,25 @@ internal class Literal(val tag: Int, val value: Int, val position: Int) {
     val isString get() = tag == Tag.SHORT_STRING || tag == Tag.LONG_STRING
 }
 
-/** A `NewObjectWithBuffer` instruction: an object written as a literal, such as a style. */
-internal class ObjectSite(val function: Int, val offset: Int, val entries: List<Pair<String?, Literal>>)
+/**
+ * A `NewObjectWithBuffer` instruction: an object written as a literal, such as a style. [keyOffset] and
+ * [valueOffset] say where its keys and its values start in the literal buffers. [isLong] is the form of
+ * the instruction with 32-bit offsets.
+ */
+internal class ObjectSite(
+    val function: Int,
+    val offset: Int,
+    val entries: List<Pair<String?, Literal>>,
+    val isLong: Boolean,
+    val keyOffset: Int,
+    val valueOffset: Int,
+)
+
+/** A `NewArrayWithBuffer` instruction: an array written as a literal. */
+internal class ArraySite(val function: Int, val offset: Int, val entries: List<Literal>)
+
+/** One run of equal values in the value buffer. [offset] is relative to the buffer, [payload] is in the file. */
+internal class ValueRun(val offset: Int, val tag: Int, val length: Int, val payload: Int)
 
 /**
  * A Hermes bytecode file (React Native's compiled JavaScript), version 96. Only what the patch needs:
@@ -64,6 +82,8 @@ internal class HermesBundle(val bytes: ByteArray) {
     private val smallStrings: Int
     private val overflowStrings: Int
     private val storage: Int
+    private val arrayBuffer: Int
+    private val arrayBufferSize: Int
     private val keyBuffer: Int
     private val keyBufferSize: Int
     private val valueBuffer: Int
@@ -99,6 +119,8 @@ internal class HermesBundle(val bytes: ByteArray) {
         p = align(p + 8 * overflowCount)
         storage = p
         p = align(p + storageSize)
+        arrayBuffer = p
+        this.arrayBufferSize = arrayBufferSize
         p = align(p + arrayBufferSize)
         keyBuffer = p
         p = align(p + keyBufferSize)
@@ -192,13 +214,7 @@ internal class HermesBundle(val bytes: ByteArray) {
             }
             repeat(run) {
                 if (values.size < count) {
-                    val width = when (tag) {
-                        Tag.NUMBER -> 8
-                        Tag.LONG_STRING, 7 -> 4
-                        Tag.SHORT_STRING -> 2
-                        Tag.BYTE_STRING -> 1
-                        else -> 0
-                    }
+                    val width = payloadWidth(tag)
                     val value = when (tag) {
                         Tag.SHORT_STRING -> u16(p)
                         Tag.LONG_STRING -> u32(p)
@@ -220,6 +236,7 @@ internal class HermesBundle(val bytes: ByteArray) {
             val count: Int
             val keyOffset: Int
             val valueOffset: Int
+            val isLong = opcode == NEW_OBJECT_WITH_BUFFER_LONG
             when (opcode) {
                 NEW_OBJECT_WITH_BUFFER -> {
                     count = u16(p + 4)
@@ -236,9 +253,67 @@ internal class HermesBundle(val bytes: ByteArray) {
             val keys = readLiterals(keyBuffer, keyBufferSize, keyOffset, count)
             val values = readLiterals(valueBuffer, valueBufferSize, valueOffset, count)
             val names = keys.map { if (it.tag == Tag.SHORT_STRING || it.tag == Tag.LONG_STRING || it.tag == Tag.BYTE_STRING) string(it.value) else null }
-            sites.add(ObjectSite(function, p, names.zip(values)))
+            sites.add(ObjectSite(function, p, names.zip(values), isLong, keyOffset, valueOffset))
         }
         return sites
+    }
+
+    /** Every array literal of the program. */
+    fun arraySites(): List<ArraySite> {
+        val sites = ArrayList<ArraySite>()
+        forEachInstruction { function, p, opcode ->
+            val count = u16(p + 4)
+            val index = when (opcode) {
+                NEW_ARRAY_WITH_BUFFER -> u16(p + 6)
+                NEW_ARRAY_WITH_BUFFER_LONG -> u32(p + 6)
+                else -> return@forEachInstruction
+            }
+            sites.add(ArraySite(function, p, readLiterals(arrayBuffer, arrayBufferSize, index, count)))
+        }
+        return sites
+    }
+
+    /** The runs of the value buffer, in order. Empty runs are left out. */
+    fun valueRuns(): List<ValueRun> {
+        val runs = ArrayList<ValueRun>()
+        var p = valueBuffer
+        val end = valueBuffer + valueBufferSize
+        while (p < end) {
+            val header = u8(p)
+            val tag = (header ushr 4) and 7
+            val length: Int
+            val payload: Int
+            if (header ushr 7 == 1) {
+                length = ((header and 15) shl 8) or u8(p + 1)
+                payload = p + 2
+            } else {
+                length = header and 15
+                payload = p + 1
+            }
+            if (length > 0) runs.add(ValueRun(p - valueBuffer, tag, length, payload))
+            p = payload + length * payloadWidth(tag)
+        }
+        ensure(p == end) { "The value buffer does not end on a run" }
+        return runs
+    }
+
+    /** The string id stored at [position] by a value of the given string [tag]. */
+    fun stringIdAt(tag: Int, position: Int): Int = when (tag) {
+        Tag.SHORT_STRING -> u16(position)
+        Tag.LONG_STRING -> u32(position)
+        Tag.BYTE_STRING -> u8(position)
+        else -> throw BundleException("Tag $tag is not a string")
+    }
+
+    /** The bytes one value of [tag] takes in a literal buffer. */
+    fun valueWidth(tag: Int) = payloadWidth(tag)
+
+    private fun payloadWidth(tag: Int) = when (tag) {
+        Tag.NUMBER -> 8
+        Tag.LONG_STRING, Tag.INTEGER -> 4
+        Tag.SHORT_STRING -> 2
+        Tag.BYTE_STRING -> 1
+        else -> 0
     }
 
     fun putU16(offset: Int, value: Int) {
@@ -269,6 +344,8 @@ internal class HermesBundle(val bytes: ByteArray) {
 
         private const val NEW_OBJECT_WITH_BUFFER = 1
         private const val NEW_OBJECT_WITH_BUFFER_LONG = 2
+        private const val NEW_ARRAY_WITH_BUFFER = 5
+        private const val NEW_ARRAY_WITH_BUFFER_LONG = 6
         private const val SWITCH_IMM = 133
 
         /** Size in bytes of each instruction, by opcode. */
