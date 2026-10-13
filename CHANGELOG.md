@@ -1,3 +1,9 @@
+## [1.6.3](https://github.com/LuckyToShine/czyeru/compare/v1.6.2...v1.6.3) (2026-10-13)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** use 47.2.41 field names in feed filter and downloads ([e6782ab](https://github.com/LuckyToShine/czyeru/commit/e6782abca254aaa5b302266e619fe734bedf693e))
+
 ## [1.6.2](https://github.com/LuckyToShine/patkot/compare/v1.6.1...v1.6.2) (2026-10-12)
 
 ### 🐛 Bug Fixes
