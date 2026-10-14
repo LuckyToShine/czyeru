@@ -1,3 +1,9 @@
+## [1.7.2](https://github.com/LuckyToShine/czyeru/compare/v1.7.1...v1.7.2) (2026-10-14)
+
+### 🐛 Bug Fixes
+
+* **uvm:** show the ID QR code in dark mode and add Hide survey pop-ups ([cff41dc](https://github.com/LuckyToShine/czyeru/commit/cff41dc54f3560d4775fab30a9a150c375641643))
+
 ## [1.7.1](https://github.com/LuckyToShine/czyeru/compare/v1.7.0...v1.7.1) (2026-10-13)
 
 ### 🐛 Bug Fixes
