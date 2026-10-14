@@ -1,3 +1,9 @@
+## [1.7.3](https://github.com/LuckyToShine/czyeru/compare/v1.7.2...v1.7.3) (2026-10-14)
+
+### 🐛 Bug Fixes
+
+* **stickerly:** upgrade AMOLED theme with runtime view themer, dialog hooks, and compose color patching ([f08934b](https://github.com/LuckyToShine/czyeru/commit/f08934b7c1e7f0ccf0bc6d14debfeb5bc77cc64d))
+
 ## [1.7.2](https://github.com/LuckyToShine/czyeru/compare/v1.7.1...v1.7.2) (2026-10-14)
 
 ### 🐛 Bug Fixes
