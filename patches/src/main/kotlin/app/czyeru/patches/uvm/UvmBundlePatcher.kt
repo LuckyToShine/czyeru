@@ -13,6 +13,7 @@ package app.czyeru.patches.uvm
  *    background becomes light text on the AMOLED background.
  * 4. Gives the navigation container the colors of its own dark theme.
  * 5. Gives HTML text, which has no color of its own and is drawn black, a light default color.
+ * 6. Keeps the box of the QR code of the school ID white. The code is dark and needs a light background.
  *
  * Every edit has the same length as what it replaces, so nothing moves. Every offset is checked first,
  * and the patch stops instead of guessing when the bundle is not the expected one.
@@ -50,6 +51,9 @@ internal object UvmBundlePatcher {
         "notification" to "rgb(255, 69, 58)",
     )
     private const val NAVIGATION_BACKGROUND_KEY = "background"
+
+    /** The box behind the QR code of the school ID: `{ marginVertical, backgroundColor: 'white', borderRadius }`. */
+    private val QR_BOX_KEYS = listOf("marginVertical", "backgroundColor", "borderRadius")
 
     /** Backgrounds of the dark theme that are a tint instead of the app's own #0A0716. */
     private val THEME_BACKGROUND_KEYS = setOf("Background", "background")
@@ -98,10 +102,18 @@ internal object UvmBundlePatcher {
         val navigation = NAVIGATION_COLORS.mapValues { id(it.value) } + (NAVIGATION_BACKGROUND_KEY to backgroundId)
 
         val sites = bytecode.objectSites()
+        val qrBoxes = sites.filter { site ->
+            site.entries.map { it.first } == QR_BOX_KEYS &&
+                site.entries[1].second.isString && strings[site.entries[1].second.value] == "white"
+        }
+        ensure(qrBoxes.size == 1) { "The box of the QR code was not found" }
+        val qrBoxPosition = qrBoxes.single().entries[1].second.position
+
         val uses = HashMap<Int, MutableList<Use>>()
         var navigationValues = 0
         for (site in sites) {
             for ((key, value) in site.entries) {
+                if (value.position == qrBoxPosition && site === qrBoxes.single()) continue
                 // Only the theme has entries without a name, such as the numbered greys.
                 if (!value.isString || (key == null && site.function != THEME_FUNCTION)) continue
                 val text = strings[value.value]
@@ -122,6 +134,8 @@ internal object UvmBundlePatcher {
             }
         }
         ensure(navigationValues == NAVIGATION_COLORS.size + 1) { "The navigation theme was not found" }
+        // The stored white of the QR box must not be shared, or changing a style that shares it changes the box.
+        ensure(qrBoxPosition !in uses) { "The white of the QR box is shared with another style" }
 
         var rewritten = 0
         var shared = 0
