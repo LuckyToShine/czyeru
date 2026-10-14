@@ -1,179 +1,114 @@
 package app.czyeru.patches.stickerly
 
-import java.io.File
-import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
-
-/** What a color is used for. It decides which colors are changed and how. */
-internal enum class Role {
-    /** Fills, backgrounds and background tints. Light surfaces become dark. */
-    BACKGROUND,
-
-    /** Text, icons and icon tints. Dark neutral colors become light. */
-    FOREGROUND,
-
-    /** Strokes and single-color icons. Both of the above. */
-    BOTH,
-}
-
-/** Colors are plain ARGB integers, as in Android. */
 internal object AmoledColors {
-    /** Alpha from which a color counts as solid. Translucent overlays are never changed. */
-    private const val MIN_SOLID_ALPHA = 0xE0
+    const val PURE_BLACK = "#ff000000"
+    const val DARK_SURFACE = "#ff121212"
+    const val DARK_SURFACE_VARIANT = "#ff1e1e1e"
+    const val DARK_DIVIDER = "#ff242424"
+    const val PURE_WHITE = "#ffffffff"
+    const val LIGHT_GRAY_TEXT = "#ffb3b3b3"
 
-    private const val SURFACE_MIN_LUMA = 0.70
-    private const val SURFACE_MAX_SATURATION = 0.30
-    private const val TEXT_MAX_LUMA = 0.40
-    private const val TEXT_MAX_SATURATION = 0.35
-    private const val NEAR_BLACK_MAX_LUMA = 0.10
-
-    /** Framework colors that are one fixed value. Selector colors such as primary_text_light are left out. */
-    private val FRAMEWORK = mapOf(
-        "white" to 0xFFFFFFFF.toInt(),
-        "black" to 0xFF000000.toInt(),
-        "transparent" to 0x00000000,
-        "darker_gray" to 0xFFAAAAAA.toInt(),
+    val namedColorReplacements = mapOf(
+        "white" to PURE_BLACK,
+        "white_100" to PURE_BLACK,
+        "bg_white" to PURE_BLACK,
+        "bg_primary" to PURE_BLACK,
+        "bg_secondary" to "#ff0a0a0a",
+        "bg_tertiary" to DARK_SURFACE,
+        "bg_default" to PURE_BLACK,
+        "bg_surface" to "#ff0a0a0a",
+        "bg_elevated" to DARK_SURFACE,
+        "bg_card" to "#ff0d0d0d",
+        "bg_dialog" to DARK_SURFACE,
+        "bg_bottom_sheet" to "#ff0d0d0d",
+        "bg_input" to "#ff161616",
+        "bg_search" to "#ff161616",
+        "bg_tab" to PURE_BLACK,
+        "bg_toolbar" to PURE_BLACK,
+        "bg_statusbar" to PURE_BLACK,
+        "bg_navigation" to PURE_BLACK,
+        "design_default_color_background" to PURE_BLACK,
+        "design_default_color_surface" to "#ff0a0a0a",
+        "cardview_light_background" to "#ff0d0d0d",
+        "gray_50" to "#ff0a0a0a",
+        "gray_100" to DARK_SURFACE,
+        "gray_150" to "#ff161616",
+        "gray_200" to DARK_SURFACE_VARIANT,
+        "gray_300" to "#ff262626",
+        "grey_50" to "#ff0a0a0a",
+        "grey_100" to DARK_SURFACE,
+        "grey_200" to DARK_SURFACE_VARIANT,
+        "grey_300" to "#ff262626",
+        "black" to PURE_WHITE,
+        "black_100" to PURE_WHITE,
+        "text_primary" to PURE_WHITE,
+        "text_secondary" to LIGHT_GRAY_TEXT,
+        "text_tertiary" to "#ff808080",
+        "text_hint" to "#ff666666",
+        "text_black" to PURE_WHITE,
+        "text_default" to PURE_WHITE,
+        "text_title" to PURE_WHITE,
+        "text_subtitle" to LIGHT_GRAY_TEXT,
+        "text_body" to "#ffe6e6e6",
+        "text_caption" to "#ff999999",
+        "gray_800" to "#ffe0e0e0",
+        "gray_850" to "#ffebebeb",
+        "gray_900" to PURE_WHITE,
+        "grey_800" to "#ffe0e0e0",
+        "grey_900" to PURE_WHITE,
+        "icon_primary" to PURE_WHITE,
+        "icon_secondary" to LIGHT_GRAY_TEXT,
+        "icon_default" to PURE_WHITE,
+        "divider" to DARK_DIVIDER,
+        "divider_color" to DARK_DIVIDER,
+        "line_gray" to DARK_DIVIDER,
+        "border_gray" to DARK_DIVIDER,
+        "border_default" to DARK_DIVIDER
     )
 
-    fun frameworkColor(name: String): Int? = FRAMEWORK[name]
+    val narrowLiteralReplacements: Map<Int, Int> = mapOf(
+        // Light backgrounds -> AMOLED Black / Dark Surfaces
+        0xFFFAFAFA.toInt() to 0xFF000000.toInt(),
+        0xFFF9F9F9.toInt() to 0xFF000000.toInt(),
+        0xFFF8F9FA.toInt() to 0xFF000000.toInt(),
+        0xFFF8F8F8.toInt() to 0xFF050505.toInt(),
+        0xFFF5F5F5.toInt() to 0xFF0D0D0D.toInt(),
+        0xFFF5F6F8.toInt() to 0xFF0D0D0D.toInt(),
+        0xFFF4F5F7.toInt() to 0xFF0D0D0D.toInt(),
+        0xFFF2F3F5.toInt() to 0xFF121212.toInt(),
+        0xFFF1F3F5.toInt() to 0xFF121212.toInt(),
+        0xFFF0F0F0.toInt() to 0xFF121212.toInt(),
+        0xFFEFEFEF.toInt() to 0xFF141414.toInt(),
+        0xFFEEEEEE.toInt() to 0xFF161616.toInt(),
+        0xFFE9ECEF.toInt() to 0xFF1A1A1A.toInt(),
+        0xFFE5E5E5.toInt() to 0xFF1F1F1F.toInt(),
+        0xFFE0E0E0.toInt() to 0xFF242424.toInt(),
+        0xFFDEE2E6.toInt() to 0xFF242424.toInt(),
 
-    /** Android color syntax: #RGB, #ARGB, #RRGGBB or #AARRGGBB. */
-    fun parse(text: String): Int? {
-        val t = text.trim()
-        if (!t.startsWith("#")) return null
-        val hex = t.substring(1)
-        if (!hex.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) return null
-        return when (hex.length) {
-            3 -> hex.map { "$it$it" }.joinToString("").let { (0xFF000000 or it.toLong(16)).toInt() }
-            4 -> hex.map { "$it$it" }.joinToString("").toLong(16).toInt()
-            6 -> (0xFF000000 or hex.toLong(16)).toInt()
-            8 -> hex.toLong(16).toInt()
-            else -> null
-        }
-    }
+        // Dark charcoal text -> Light text
+        0xFF111111.toInt() to 0xFFFFFFFF.toInt(),
+        0xFF191919.toInt() to 0xFFFFFFFF.toInt(),
+        0xFF1A1A1A.toInt() to 0xFFFFFFFF.toInt(),
+        0xFF202020.toInt() to 0xFFF5F5F5.toInt(),
+        0xFF212121.toInt() to 0xFFF5F5F5.toInt(),
+        0xFF212529.toInt() to 0xFFF5F5F5.toInt(),
+        0xFF222222.toInt() to 0xFFF0F0F0.toInt(),
+        0xFF333333.toInt() to 0xFFE0E0E0.toInt(),
+        0xFF343A40.toInt() to 0xFFE0E0E0.toInt(),
+        0xFF444444.toInt() to 0xFFCCCCCC.toInt(),
+        0xFF495057.toInt() to 0xFFCCCCCC.toInt()
+    )
 
-    fun format(argb: Int): String = if (alpha(argb) == 0xFF) {
-        "#%06x".format(argb and 0xFFFFFF)
-    } else {
-        "#%08x".format(argb)
-    }
-
-    private fun alpha(c: Int) = c ushr 24
-    private fun red(c: Int) = (c shr 16) and 0xFF
-    private fun green(c: Int) = (c shr 8) and 0xFF
-    private fun blue(c: Int) = c and 0xFF
-
-    fun luma(c: Int): Double = (0.299 * red(c) + 0.587 * green(c) + 0.114 * blue(c)) / 255.0
-
-    private fun saturation(c: Int): Double {
-        val hi = max(red(c), max(green(c), blue(c)))
-        val lo = min(red(c), min(green(c), blue(c)))
-        return if (hi == 0) 0.0 else (hi - lo).toDouble() / hi
-    }
-
-    fun isSolid(c: Int) = alpha(c) >= MIN_SOLID_ALPHA
-
-    fun isLightSurface(c: Int) =
-        isSolid(c) && luma(c) >= SURFACE_MIN_LUMA && saturation(c) <= SURFACE_MAX_SATURATION
-
-    fun isDarkNeutral(c: Int) =
-        isSolid(c) && luma(c) <= TEXT_MAX_LUMA && saturation(c) <= TEXT_MAX_SATURATION
-
-    private fun isNearBlack(c: Int) = isSolid(c) && luma(c) <= NEAR_BLACK_MAX_LUMA && saturation(c) <= TEXT_MAX_SATURATION
-
-    /** Opaque and not colorful: white, black and greys. */
-    fun isNeutral(c: Int) = isSolid(c) && saturation(c) <= TEXT_MAX_SATURATION
-
-    /** Keeps hue and saturation and flips lightness: white becomes black, #222222 becomes #dddddd. */
-    private fun invertLightness(c: Int): Int {
-        val r = red(c) / 255.0
-        val g = green(c) / 255.0
-        val b = blue(c) / 255.0
-        val hi = max(r, max(g, b))
-        val lo = min(r, min(g, b))
-        val l = (hi + lo) / 2
-        val d = hi - lo
-        val s = if (d == 0.0) 0.0 else d / (1 - abs(2 * l - 1))
-        val h = when {
-            d == 0.0 -> 0.0
-            hi == r -> (((g - b) / d) % 6 + 6) % 6
-            hi == g -> (b - r) / d + 2
-            else -> (r - g) / d + 4
-        }
-        val l2 = 1 - l
-        val c2 = (1 - abs(2 * l2 - 1)) * s
-        val x = c2 * (1 - abs(h % 2 - 1))
-        val m = l2 - c2 / 2
-        val (r1, g1, b1) = when {
-            h < 1 -> Triple(c2, x, 0.0)
-            h < 2 -> Triple(x, c2, 0.0)
-            h < 3 -> Triple(0.0, c2, x)
-            h < 4 -> Triple(0.0, x, c2)
-            h < 5 -> Triple(x, 0.0, c2)
-            else -> Triple(c2, 0.0, x)
-        }
-        fun ch(v: Double) = ((v + m) * 255).roundToInt().coerceIn(0, 255)
-        return (alpha(c) shl 24) or (ch(r1) shl 16) or (ch(g1) shl 8) or ch(b1)
-    }
-
-    /** Moves the darkest color (pure black) up to [base]. Brighter colors scale to fit. */
-    private fun liftBlack(c: Int, base: Int): Int {
-        fun ch(v: Int, floor: Int) = (floor + v * (255 - floor) / 255.0).roundToInt().coerceIn(0, 255)
-        return (alpha(c) shl 24) or
-            (ch(red(c), red(base)) shl 16) or
-            (ch(green(c), green(base)) shl 8) or
-            ch(blue(c), blue(base))
-    }
+    private fun packComposeColor(argb: Long): Long = (argb and 0xFFFFFFFFL) shl 32
 
     /**
-     * Returns the AMOLED version of [c] for [role], or [c] itself when it should stay.
-     * [base] is the color that replaces white surfaces. Pure black by default.
-     *
-     * Backgrounds: light surfaces become dark, and the near-black surfaces of the light theme
-     * (#111111) become [base], so that nothing is brighter than needed.
-     * Foregrounds: dark neutral colors become light.
+     * Jetpack Compose Color(0xFF......) 64-bit ULong constants.
+     * In Compose, sRGB colors are stored in the upper 32 bits of a 64-bit Long with 0x00000000 in the lower 32 bits.
      */
-    fun map(c: Int, role: Role, base: Int): Int {
-        if (role != Role.FOREGROUND && isLightSurface(c)) return liftBlack(invertLightness(c), base)
-        if (role == Role.BACKGROUND && isNearBlack(c)) return (alpha(c) shl 24) or (base and 0xFFFFFF)
-        if (role != Role.BACKGROUND && isDarkNeutral(c)) return invertLightness(c)
-        return c
-    }
-
-    /** True when [c] stays a bright color after [map] as a background. Dark text on it must stay dark. */
-    fun staysBright(c: Int): Boolean = isSolid(c) && luma(c) >= 0.5 && !isLightSurface(c)
-}
-
-/**
- * Looks up color values from values/colors.xml, following @color/ references.
- * Colors that are selectors (res/color) or theme attributes have no single value and give null.
- */
-internal class ColorResolver(resDir: File) {
-    private val named = HashMap<String, String>()
-
-    init {
-        val file = File(resDir, "values/colors.xml")
-        if (file.isFile) {
-            val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
-            val nodes = doc.getElementsByTagName("color")
-            for (i in 0 until nodes.length) {
-                val e = nodes.item(i) as org.w3c.dom.Element
-                named[e.getAttribute("name")] = e.textContent.trim()
-            }
-        }
-    }
-
-    fun resolve(value: String, depth: Int = 0): Int? {
-        if (depth > 8) return null
-        val v = value.trim()
-        return when {
-            v.startsWith("#") -> AmoledColors.parse(v)
-            v.startsWith("@android:color/") -> AmoledColors.frameworkColor(v.removePrefix("@android:color/"))
-            v.startsWith("@color/") -> named[v.removePrefix("@color/")]?.let { resolve(it, depth + 1) }
-            else -> null
+    val composeWideLiteralReplacements: Map<Long, Long> = buildMap {
+        put(packComposeColor(0xFFFFFFFFL), packComposeColor(0xFF000000L))
+        for ((src, dst) in narrowLiteralReplacements) {
+            put(packComposeColor(src.toLong()), packComposeColor(dst.toLong()))
         }
     }
 }

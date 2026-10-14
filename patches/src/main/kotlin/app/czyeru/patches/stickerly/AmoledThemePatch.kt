@@ -1,132 +1,340 @@
 package app.czyeru.patches.stickerly
 
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patcher.patch.stringOption
 import app.czyeru.patches.shared.Constants.COMPATIBILITY_STICKERLY
-import java.io.File
-import java.util.logging.Logger
-import javax.xml.parsers.DocumentBuilderFactory
-import org.w3c.dom.Document
+import app.czyeru.util.findMutableMethodOf
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import org.w3c.dom.Element
 
-/**
- * Resources that belong to libraries, such as AppCompat, Material, ExoPlayer and the ad SDKs.
- * They get the dark theme through the app theme, or have their own look. Only the palette
- * references in them are fixed.
- */
-private val LIBRARY_PREFIXES = listOf(
-    "abc_", "mtrl_", "material_", "design_", "m3_", "$", "common_", "com_", "exo_", "mbridge_",
-    "applovin_", "max_", "mediation_", "moloco_", "messenger_", "browser_", "preference_",
-    "notification_", "fingerprint_", "tooltip_", "compat_", "support_", "ime_", "select_dialog",
-    "expand_button", "tt_", "admob_", "aps_", "avd_", "ia_", "im_", "cb_", "btn_checkbox", "btn_radio",
-    "offline_", "dt_store", "content_info", "open_url", "learn_more", "pn_circular", "mainlayout",
-    "background_lightpopup",
-)
+private const val STICKERLY_PACKAGE_PREFIX = "Lcom/snowcorp/stickerly/"
+private const val HELPER_CLASS_DESCRIPTOR = "Lapp/czyeru/extension/stickerly/AmoledHelper;"
 
-/** Drawables that must keep their colors: app icons and the system splash icon. */
-private val KEPT_DRAWABLES = listOf("ic_launcher", "splash_icon")
+val amoledResourcePatch = resourcePatch {
+    execute {
+        // 1. Patch res/values/colors.xml and res/values-night/colors.xml
+        val colorFiles = listOf(
+            "res/values/colors.xml",
+            "res/values-night/colors.xml"
+        )
 
-private fun parseXml(file: File): Document =
-    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+        for (relativePath in colorFiles) {
+            val file = get(relativePath, false)
+            if (!file.exists()) continue
+
+            document(relativePath).use { document ->
+                val colorNodes = document.getElementsByTagName("color")
+                for (i in 0 until colorNodes.length) {
+                    val node = colorNodes.item(i) as? Element ?: continue
+                    val name = node.getAttribute("name")
+                    val currentVal = node.textContent?.trim() ?: continue
+
+                    // Direct name match or intelligent hex conversion
+                    val replacement = AmoledColors.namedColorReplacements[name]
+                        ?: AmoledConverter.convertHexColor(
+                            currentVal,
+                            nameOrAttr = name
+                        )
+
+                    if (replacement != null) {
+                        node.textContent = replacement
+                    }
+                }
+            }
+        }
+
+        // 2. Patch styles.xml to ensure windowBackground, statusBarColor, and navigationBarColor are pure black
+        val styleFiles = listOf(
+            "res/values/styles.xml",
+            "res/values-night/styles.xml",
+            "res/values-v27/styles.xml",
+            "res/values-v29/styles.xml"
+        )
+
+        val windowBlackAttrs = setOf(
+            "android:windowBackground",
+            "windowBackground",
+            "android:statusBarColor",
+            "statusBarColor",
+            "android:navigationBarColor",
+            "navigationBarColor",
+            "android:colorBackground",
+            "colorBackground",
+            "colorSurface"
+        )
+
+        val lightSystemBarAttrs = setOf(
+            "android:windowLightStatusBar",
+            "android:windowLightNavigationBar"
+        )
+
+        for (relativePath in styleFiles) {
+            val file = get(relativePath, false)
+            if (!file.exists()) continue
+
+            document(relativePath).use { document ->
+                val itemNodes = document.getElementsByTagName("item")
+                for (i in 0 until itemNodes.length) {
+                    val item = itemNodes.item(i) as? Element ?: continue
+                    val attrName = item.getAttribute("name")
+                    if (attrName in windowBlackAttrs) {
+                        val text = item.textContent?.trim() ?: ""
+                        if (text.startsWith("#") || text.contains("white") || text.contains("gray") || text.contains("grey")) {
+                            item.textContent = "@android:color/black"
+                        }
+                    } else if (attrName in lightSystemBarAttrs) {
+                        item.textContent = "false"
+                    }
+                }
+            }
+        }
+
+        // 3. Fast single-pass scan over res/layout*, res/drawable*, and res/color* XML files
+        val resDir = get("res", false)
+        if (resDir.exists() && resDir.isDirectory) {
+            val targetDirs = resDir.listFiles { dir ->
+                dir.isDirectory && (
+                    dir.name.startsWith("layout") ||
+                    dir.name.startsWith("drawable") ||
+                    dir.name.startsWith("color")
+                )
+            }.orEmpty()
+
+            // Regex to match hardcoded hex color attributes in XML files without full DOM overhead
+            val attrHexRegex = Regex("""([a-zA-Z0-9_]+:[a-zA-Z0-9_]+)\s*=\s*"(#[0-9a-fA-F]{3,8})"""")
+
+            for (dir in targetDirs) {
+                val xmlFiles = dir.listFiles { f -> f.isFile && f.extension == "xml" }.orEmpty()
+                for (xmlFile in xmlFiles) {
+                    val content = xmlFile.readText()
+                    if (!content.contains('#')) continue
+
+                    var modified = false
+                    val updatedContent = attrHexRegex.replace(content) { matchResult ->
+                        val attrName = matchResult.groupValues[1]
+                        val hexValue = matchResult.groupValues[2]
+                        val converted = AmoledConverter.convertHexColor(hexValue, attrName)
+                        if (converted != null && !converted.equals(hexValue, ignoreCase = true)) {
+                            modified = true
+                            """$attrName="$converted""""
+                        } else {
+                            matchResult.value
+                        }
+                    }
+
+                    if (modified) {
+                        xmlFile.writeText(updatedContent)
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Suppress("unused")
-val amoledThemePatch = resourcePatch(
+val amoledThemePatch = bytecodePatch(
     name = "AMOLED theme",
-    description = "Replaces the light theme with a dark AMOLED theme. Backgrounds become black and " +
-        "dark text becomes light. Pictures (PNG, WebP) and colors set in code are not changed.",
+    description = "Forces a true black AMOLED theme across all Stickerly screens, Jetpack Compose UI, dialogs, and bottom sheets.",
     default = true
 ) {
     compatibleWith(COMPATIBILITY_STICKERLY)
 
-    val amoledColor by stringOption(
-        key = "amoledColor",
-        default = "#000000",
-        values = mapOf(
-            "Pure black" to "#000000",
-            "Near black" to "#0A0A0A",
-            "Dark charcoal" to "#121212",
-        ),
-        title = "Background color",
-        description = "The color of the screens that were white. Pure black turns the pixels off on AMOLED screens.",
-        required = true,
-        validator = { it != null && Regex("#[0-9A-Fa-f]{6}").matches(it) }
-    )
+    dependsOn(amoledResourcePatch)
+    extendWith("extensions/extension.mpe")
 
     execute {
-        val logger = Logger.getLogger("AmoledTheme")
+        // Hook Stickerly Application.onCreate() to initialize global Night Mode & Window Lifecycle callbacks
+        classDefForEach { classDef ->
+            val type = classDef.type
+            if (!type.startsWith(STICKERLY_PACKAGE_PREFIX)) return@classDefForEach
 
-        val resDir = get("res", false)
-        if (!resDir.isDirectory) throw PatchException("The res directory was not found")
-
-        val color = amoledColor ?: "#000000"
-        val base = AmoledColors.parse(color) ?: throw PatchException("Invalid background color $color")
-        val converter = AmoledConverter(resDir, base)
-
-        fun isLibrary(file: File) = LIBRARY_PREFIXES.any { file.name.startsWith(it) }
-
-        /** Every XML file of the directories whose name passes [dirFilter]. Night variants are never included. */
-        fun xmlFiles(dirFilter: (String) -> Boolean): List<File> =
-            (resDir.listFiles() ?: emptyArray())
-                .filter { it.isDirectory && !it.name.contains("night") && dirFilter(it.name) }
-                .sortedBy { it.name }
-                .flatMap { dir -> (dir.listFiles() ?: emptyArray()).filter { it.extension == "xml" }.sortedBy { it.name } }
-
-        /** Converts a file on a scratch copy first, so only the files that change are rewritten. */
-        fun convertAll(files: List<File>, convert: (Document) -> Boolean): Int {
-            var changed = 0
-            for (file in files) {
-                val path = "res/" + file.relativeTo(resDir).invariantSeparatorsPath
-                if (!convert(parseXml(file))) continue
-                document(path).use { convert(it) }
-                changed++
+            // Hook Application subclass onCreate()
+            if (classDef.superclass == "Landroid/app/Application;" ||
+                type.endsWith("StickerlyApplication;") ||
+                type.endsWith("App;")
+            ) {
+                val onCreateMethod = classDef.methods.firstOrNull {
+                    it.name == "onCreate" && it.parameterTypes.isEmpty()
+                }
+                if (onCreateMethod != null) {
+                    mutableClassDefBy(type).findMutableMethodOf(onCreateMethod).addInstruction(
+                        0,
+                        "invoke-static {p0}, $HELPER_CLASS_DESCRIPTOR->init(Landroid/app/Application;)V"
+                    )
+                }
             }
-            return changed
-        }
 
-        // values: themes, the palette and the lists that can hold colors. Strings and the like have none.
-        val valueFiles = xmlFiles { it.startsWith("values") }
-        val styleFiles = valueFiles.filter { it.name == "styles.xml" }
-        styleFiles.forEach { converter.registerStyles(parseXml(it)) }
+            // Patch Jetpack Compose 64-bit Color(0xFF......) and 32-bit UI color constants inside Stickerly classes
+            val isUiOrComposeClass = type.contains("/ui/") ||
+                type.contains("/compose/") ||
+                type.contains("/theme/") ||
+                type.contains("/design/") ||
+                type.contains("/view/") ||
+                type.contains("/dialog/") ||
+                type.contains("/widget/") ||
+                type.contains("/home/") ||
+                type.contains("/profile/") ||
+                type.contains("/search/") ||
+                type.contains("/detail/") ||
+                type.contains("/editor/") ||
+                type.contains("/settings/")
 
-        val themes = convertAll(styleFiles) { converter.convertStyles(it) or converter.pin(it) }
-        val palette = convertAll(valueFiles.filter { it.parentFile.name == "values" && it.name == "colors.xml" }) {
-            converter.flipPalette(it)
-        }
-        convertAll(valueFiles.filter { it.name == "arrays.xml" || it.name == "drawables.xml" || (it.name == "colors.xml" && it.parentFile.name != "values") }) {
-            converter.pin(it)
-        }
+            for (method in classDef.methods) {
+                val impl = method.implementation ?: continue
+                val instructions = impl.instructions
 
-        val layoutFiles = xmlFiles { it.startsWith("layout") }
-        val layouts = convertAll(layoutFiles.filterNot(::isLibrary)) { converter.convertLayout(it) or converter.pin(it) }
-        convertAll(layoutFiles.filter(::isLibrary)) { converter.pin(it) }
+                var needsPatch = false
+                for (insn in instructions) {
+                    when (insn.opcode) {
+                        Opcode.CONST_WIDE,
+                        Opcode.CONST_WIDE_HIGH16,
+                        Opcode.CONST_WIDE_32 -> {
+                            val wideLiteral = (insn as? WideLiteralInstruction)?.wideLiteral ?: continue
+                            if (AmoledColors.composeWideLiteralReplacements.containsKey(wideLiteral)) {
+                                needsPatch = true
+                                break
+                            }
+                        }
+                        Opcode.CONST,
+                        Opcode.CONST_HIGH16 -> {
+                            if (isUiOrComposeClass) {
+                                val narrowLiteral = (insn as? NarrowLiteralInstruction)?.narrowLiteral ?: continue
+                                if (AmoledColors.narrowLiteralReplacements.containsKey(narrowLiteral)) {
+                                    needsPatch = true
+                                    break
+                                }
+                            }
+                        }
+                        Opcode.INVOKE_VIRTUAL -> {
+                            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                            if ((ref.name == "setBackgroundColor" && ref.definingClass == "Landroid/view/View;") ||
+                                (ref.name == "setCardBackgroundColor" && ref.definingClass == "Landroidx/cardview/widget/CardView;")
+                            ) {
+                                needsPatch = true
+                                break
+                            }
+                        }
+                        else -> {}
+                    }
+                }
 
-        val drawableFiles = xmlFiles { it.startsWith("drawable") }
-        fun keepsColors(file: File) = isLibrary(file) || KEPT_DRAWABLES.any { file.name.startsWith(it) }
-        val drawables = convertAll(drawableFiles.filterNot(::keepsColors)) { converter.convertDrawable(it) or converter.pin(it) }
-        convertAll(drawableFiles.filter(::keepsColors)) { converter.pin(it) }
+                if (!needsPatch) continue
 
-        // Color selectors. The ones of the app are named selector_*, and are used for text.
-        val colorFiles = xmlFiles { it == "color" || it.startsWith("color-") }
-        val colorLists = convertAll(colorFiles.filter { it.name.startsWith("selector_") }) {
-            converter.convertColorList(it) or converter.pin(it)
-        }
-        convertAll(colorFiles.filterNot { it.name.startsWith("selector_") }) { converter.pin(it) }
+                val mutableMethod = mutableClassDefBy(type).findMutableMethodOf(method)
+                val mutableInsns = mutableMethod.instructions
+                for (index in mutableInsns.size - 1 downTo 0) {
+                    val insn = mutableInsns[index]
+                    when (insn.opcode) {
+                        // Replace 64-bit Jetpack Compose Color(0xFF......) literals
+                        Opcode.CONST_WIDE,
+                        Opcode.CONST_WIDE_HIGH16,
+                        Opcode.CONST_WIDE_32 -> {
+                            val wideInsn = insn as? WideLiteralInstruction ?: continue
+                            val reg = (insn as? OneRegisterInstruction)?.registerA ?: continue
+                            val replacement = AmoledColors.composeWideLiteralReplacements[wideInsn.wideLiteral] ?: continue
 
-        // Everything else that can name a color: menus, XML configs, animations, adaptive icons.
-        val others = convertAll(
-            xmlFiles {
-                !it.startsWith("values") && !it.startsWith("layout") && !it.startsWith("drawable") &&
-                    it != "color" && !it.startsWith("color-") && !it.startsWith("raw")
+                            mutableMethod.replaceInstruction(
+                                index,
+                                "const-wide v$reg, 0x${java.lang.Long.toHexString(replacement)}L"
+                            )
+                        }
+
+                        // Replace 32-bit surface/text color literals in UI packages
+                        Opcode.CONST,
+                        Opcode.CONST_HIGH16 -> {
+                            if (!isUiOrComposeClass) continue
+                            val narrowInsn = insn as? NarrowLiteralInstruction ?: continue
+                            val reg = (insn as? OneRegisterInstruction)?.registerA ?: continue
+                            val replacement = AmoledColors.narrowLiteralReplacements[narrowInsn.narrowLiteral] ?: continue
+
+                            if (reg in 0..15) {
+                                mutableMethod.replaceInstruction(
+                                    index,
+                                    "const v$reg, 0x${Integer.toHexString(replacement)}"
+                                )
+                            }
+                        }
+
+                        // Intercept View.setBackgroundColor(int) and CardView.setCardBackgroundColor(int)
+                        Opcode.INVOKE_VIRTUAL -> {
+                            val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                            if (ref.parameterTypes.size == 1 && ref.parameterTypes[0] == "I") {
+                                if ((ref.name == "setBackgroundColor" && ref.definingClass == "Landroid/view/View;") ||
+                                    (ref.name == "setCardBackgroundColor" && ref.definingClass == "Landroidx/cardview/widget/CardView;")
+                                ) {
+                                    val twoReg = insn as? TwoRegisterInstruction ?: continue
+                                    val colorReg = twoReg.registerB
+                                    if (colorReg in 0..15) {
+                                        mutableMethod.addInstructions(
+                                            index,
+                                            """
+                                                invoke-static {v$colorReg}, $HELPER_CLASS_DESCRIPTOR->mapBackgroundColor(I)I
+                                                move-result v$colorReg
+                                            """.trimIndent()
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> {}
+                    }
+                }
             }
-        ) { converter.pin(it) }
-
-        // These files exist in the app. If none changed, the app changed and the patch is out of date.
-        if (themes == 0 || palette == 0 || layouts == 0 || drawables == 0) {
-            throw PatchException("Nothing to change: themes=$themes palette=$palette layouts=$layouts drawables=$drawables")
         }
-        logger.info(
-            "AMOLED theme applied: $themes style file(s), $palette palette file, $layouts layout(s), " +
-                "$drawables drawable(s), $colorLists color list(s), $others other file(s)"
+
+        // Hook LayoutInflater.createView / createViewFromTag in androidx AppCompatViewInflater
+        classDefByOrNull("Landroidx/appcompat/app/AppCompatViewInflater;")?.let { inflaterClass ->
+            val createViewMethod = inflaterClass.methods.firstOrNull {
+                it.name == "createView" || it.name == "createViewFromTag"
+            }
+            if (createViewMethod != null) {
+                val mutableMethod = mutableClassDefBy(inflaterClass.type).findMutableMethodOf(createViewMethod)
+                val insns = mutableMethod.instructions
+                for (i in insns.size - 1 downTo 0) {
+                    if (insns[i].opcode == Opcode.RETURN_OBJECT) {
+                        val retReg = (insns[i] as OneRegisterInstruction).registerA
+                        mutableMethod.addInstruction(
+                            i,
+                            "invoke-static {v$retReg}, $HELPER_CLASS_DESCRIPTOR->themeSingleView(Landroid/view/View;)V"
+                        )
+                    }
+                }
+            }
+        }
+
+        // Hook BottomSheetDialog & ComponentDialog onStart() so all popups and sheets get AMOLED windows
+        val dialogClasses = setOf(
+            "Lcom/google/android/material/bottomsheet/BottomSheetDialog;",
+            "Landroidx/appcompat/app/AppCompatDialog;",
+            "Landroidx/activity/ComponentDialog;"
         )
+
+        for (dialogClass in dialogClasses) {
+            val classDef = classDefByOrNull(dialogClass) ?: continue
+            val onStartMethod = classDef.methods.firstOrNull {
+                it.name == "onStart" && it.parameterTypes.isEmpty()
+            } ?: continue
+            val mutableMethod = mutableClassDefBy(classDef.type).findMutableMethodOf(onStartMethod)
+            val insns = mutableMethod.instructions
+            for (i in insns.size - 1 downTo 0) {
+                if (insns[i].opcode == Opcode.RETURN_VOID) {
+                    mutableMethod.addInstruction(
+                        i,
+                        "invoke-static {p0}, $HELPER_CLASS_DESCRIPTOR->onDialogStart(Landroid/app/Dialog;)V"
+                    )
+                }
+            }
+        }
     }
 }
