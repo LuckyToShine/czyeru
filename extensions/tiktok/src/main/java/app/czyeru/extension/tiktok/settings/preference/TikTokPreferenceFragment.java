@@ -321,10 +321,15 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
 
         addMenu(screen, Section.BEHAVIOR, SettingsMenuPreference.Icon.BEHAVIOR, countBehaviorSettings());
 
-        if (SettingsStatus.favoritePlaylistGridEnabled || SettingsStatus.favoritePlaylistSearchEnabled) {
+        if (SettingsStatus.favoritePlaylistGridEnabled
+                || SettingsStatus.favoritePlaylistSearchEnabled
+                || SettingsStatus.likedVideosSearchEnabled
+                || SettingsStatus.chooseCollectionSearchEnabled) {
             addMenu(screen, Section.ERUDITE, SettingsMenuPreference.Icon.LAYOUT, countEnabled(
                     SettingsStatus.favoritePlaylistGridEnabled && Settings.FAVORITE_PLAYLIST_GRID.get(),
-                    SettingsStatus.favoritePlaylistSearchEnabled && Settings.FAVORITE_PLAYLIST_SEARCH.get()
+                    SettingsStatus.favoritePlaylistSearchEnabled && Settings.FAVORITE_PLAYLIST_SEARCH.get(),
+                    SettingsStatus.likedVideosSearchEnabled && Settings.LIKED_VIDEOS_SEARCH.get(),
+                    SettingsStatus.chooseCollectionSearchEnabled && Settings.CHOOSE_COLLECTION_SEARCH.get()
             ));
         }
 

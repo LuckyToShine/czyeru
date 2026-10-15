@@ -17,11 +17,39 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
     @Override
     public boolean getSettingsStatus() {
         return SettingsStatus.favoritePlaylistGridEnabled
-                || SettingsStatus.favoritePlaylistSearchEnabled;
+                || SettingsStatus.favoritePlaylistSearchEnabled
+                || SettingsStatus.likedVideosSearchEnabled
+                || SettingsStatus.chooseCollectionSearchEnabled;
     }
 
     @Override
     public void addPreferences(Context context) {
+        if (SettingsStatus.favoritePlaylistGridEnabled || SettingsStatus.favoritePlaylistSearchEnabled) {
+            addFavoritePlaylistPreferences(context);
+        }
+        if (SettingsStatus.likedVideosSearchEnabled) {
+            addPreference(group(context, "Liked videos"));
+            addPreference(new TogglePreference(
+                    context,
+                    "Liked videos search bar",
+                    "Add a search bar to the liked videos page to filter loaded videos by description "
+                            + "or creator. Requires restart.",
+                    Settings.LIKED_VIDEOS_SEARCH
+            ));
+        }
+        if (SettingsStatus.chooseCollectionSearchEnabled) {
+            addPreference(group(context, "Save to collection"));
+            addPreference(new TogglePreference(
+                    context,
+                    "Collection picker search bar",
+                    "Add a search bar to the sheet where you pick a collection for a saved video. "
+                            + "Requires restart.",
+                    Settings.CHOOSE_COLLECTION_SEARCH
+            ));
+        }
+    }
+
+    private void addFavoritePlaylistPreferences(Context context) {
         addPreference(group(context, "Favorite playlists"));
         if (SettingsStatus.favoritePlaylistGridEnabled) {
             addPreference(new TogglePreference(

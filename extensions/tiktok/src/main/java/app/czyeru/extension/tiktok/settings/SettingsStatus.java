@@ -39,6 +39,8 @@ public class SettingsStatus {
     public static boolean autoScrollEnabled = false;
     public static boolean favoritePlaylistGridEnabled = false;
     public static boolean favoritePlaylistSearchEnabled = false;
+    public static boolean likedVideosSearchEnabled = false;
+    public static boolean chooseCollectionSearchEnabled = false;
 
     // Patched load() marks the features included in this APK. Run it before
     // any feature reads these flags, including feed hooks reached at startup.
@@ -176,6 +178,14 @@ public class SettingsStatus {
 
     public static void enableFavoritePlaylistSearch() {
         favoritePlaylistSearchEnabled = true;
+    }
+
+    public static void enableLikedVideosSearch() {
+        likedVideosSearchEnabled = true;
+    }
+
+    public static void enableChooseCollectionSearch() {
+        chooseCollectionSearchEnabled = true;
     }
 
     public static void load() {

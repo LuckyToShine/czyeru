@@ -29,6 +29,25 @@ internal object CollectionListCreateViewHolderFingerprint : Fingerprint(
     strings = listOf("personal_homepage", "not match view type"),
 )
 
+/** Builds the RecyclerView of the "save to collection" sheet. */
+internal object ChooseCollectionViewCreatedFingerprint : Fingerprint(
+    definingClass = "/CollectionListChooseAssem;",
+    name = "onViewCreated",
+    returnType = "V",
+    parameters = listOf("Landroid/view/View;"),
+)
+
+/** Bind method of the "save to collection" adapter: the only bind in a class holding CollectionListChooseAssem. */
+internal object ChooseCollectionBindViewHolderFingerprint : Fingerprint(
+    name = "onBindBasicViewHolder",
+    returnType = "V",
+    parameters = listOf("Landroidx/recyclerview/widget/RecyclerView\$ViewHolder;", "I"),
+    custom = { _, classDef ->
+        classDef.fields.any { it.type.endsWith("/CollectionListChooseAssem;") } &&
+            classDef.methods.any { it.name == "onCreateBasicViewHolder" }
+    },
+)
+
 /** Bind method of the same adapter: the only bind in a class holding CollectionListMainUIAssem. */
 internal object CollectionListBindViewHolderFingerprint : Fingerprint(
     name = "onBindBasicViewHolder",
