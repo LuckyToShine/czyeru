@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.7.3](https://github.com/LuckyToShine/czyeru/releases/tag/v1.7.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;52 patches total
+> **[v1.7.4](https://github.com/LuckyToShine/czyeru/releases/tag/v1.7.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;54 patches total
 <details open>
 <summary>📦 Conexión Lince UVM&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>
@@ -49,7 +49,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 </details>
 
 <details open>
-<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;44 patches</summary>
+<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;46 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -60,6 +60,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Always show publish date](#always-show-publish-date) | Always shows the publish date in video author information. Thanks to lyyako for the original implementation. |  |
+| [Collection picker search](#collection-picker-search) | Adds an option to show a search bar on the sheet where you pick the collection for a saved video, so you do not have to scroll through every collection. |  |
 | [Comment sort controls](#comment-sort-controls) | Exposes TikTok's native full comment-sort sheet, including its hot, time, media, and creator modes, instead of relying on rollout gates. |  |
 | [Copy comments without username](#copy-comments-without-username) | Copies only the comment text without including the creator's username. |  |
 | [Custom offline videos limit](#custom-offline-videos-limit) | Adds a custom entry to TikTok's offline videos menu with a configurable limit from 1 to 1000 videos. |  |
@@ -91,6 +92,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Hide quick comment reactions](#hide-quick-comment-reactions) | Hides TikTok's exposed quick emoji row in supported comment inputs. |  |
 | [Hide suggested accounts](#hide-suggested-accounts) | Removes suggested-account cards from profile and inbox surfaces. Thanks to tymmesyde for the original implementation. |  |
 | [Hold-and-slide 2x lock](#hold-and-slide-2x-lock) | Enables TikTok's native hold, slide down, and release gesture to lock 2x speed. |  |
+| [Liked videos search](#liked-videos-search) | Adds an option to show a search bar on the liked videos page that filters loaded videos by description or creator. |  |
 | [Open external links directly](#open-external-links-directly) | Opens profile and story website links in the system browser instead of TikTok's in-app browser. Thanks to lyyako for the original implementation. |  |
 | [Playback speed](#playback-speed) | Enables playback-speed controls for all videos and remembers the selected speed between videos. |  |
 | [Region spoof](#region-spoof) | Adds in-app controls for changing the region TikTok reads. |  |

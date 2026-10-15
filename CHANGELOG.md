@@ -1,3 +1,9 @@
+## [1.7.4](https://github.com/LuckyToShine/czyeru/compare/v1.7.3...v1.7.4) (2026-10-15)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** add Liked videos search and Collection picker search ([fe8a32b](https://github.com/LuckyToShine/czyeru/commit/fe8a32bab695937446119cbb69dfd83e13badd45))
+
 ## [1.7.3](https://github.com/LuckyToShine/czyeru/compare/v1.7.2...v1.7.3) (2026-10-14)
 
 ### 🐛 Bug Fixes
