@@ -5,6 +5,8 @@ import android.preference.PreferenceScreen;
 
 import app.czyeru.extension.tiktok.settings.Settings;
 import app.czyeru.extension.tiktok.settings.SettingsStatus;
+import app.czyeru.extension.tiktok.settings.preference.ClearCollectionsCachePreference;
+import app.czyeru.extension.tiktok.settings.preference.CollectionSortPreference;
 import app.czyeru.extension.tiktok.settings.preference.TogglePreference;
 
 @SuppressWarnings("deprecation")
@@ -19,7 +21,10 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
         return SettingsStatus.favoritePlaylistGridEnabled
                 || SettingsStatus.favoritePlaylistSearchEnabled
                 || SettingsStatus.likedVideosSearchEnabled
-                || SettingsStatus.chooseCollectionSearchEnabled;
+                || SettingsStatus.chooseCollectionSearchEnabled
+                || SettingsStatus.keepCollectionsLoadedEnabled
+                || SettingsStatus.collectionSortEnabled
+                || SettingsStatus.collectionVideosSearchEnabled;
     }
 
     @Override
@@ -45,6 +50,37 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
                     "Add a search bar to the sheet where you pick a collection for a saved video. "
                             + "Requires restart.",
                     Settings.CHOOSE_COLLECTION_SEARCH
+            ));
+        }
+        if (SettingsStatus.keepCollectionsLoadedEnabled
+                || SettingsStatus.collectionSortEnabled
+                || SettingsStatus.collectionVideosSearchEnabled) {
+            addCollectionPreferences(context);
+        }
+    }
+
+    private void addCollectionPreferences(Context context) {
+        addPreference(group(context, "Collections"));
+        if (SettingsStatus.keepCollectionsLoadedEnabled) {
+            addPreference(new TogglePreference(
+                    context,
+                    "Keep collections loaded",
+                    "Remember every collection you have scrolled to, so the collections page and the "
+                            + "save sheet show them all right away instead of loading them page by page again.",
+                    Settings.KEEP_COLLECTIONS_LOADED
+            ));
+            addPreference(new ClearCollectionsCachePreference(context));
+        }
+        if (SettingsStatus.collectionSortEnabled) {
+            addPreference(new CollectionSortPreference(context, Settings.COLLECTION_SORT));
+        }
+        if (SettingsStatus.collectionVideosSearchEnabled) {
+            addPreference(new TogglePreference(
+                    context,
+                    "Collection videos search bar",
+                    "Add a search bar inside a collection to filter loaded videos by description "
+                            + "or creator. Requires restart.",
+                    Settings.COLLECTION_VIDEOS_SEARCH
             ));
         }
     }

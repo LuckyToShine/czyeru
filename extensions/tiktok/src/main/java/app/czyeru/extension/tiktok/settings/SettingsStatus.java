@@ -41,6 +41,9 @@ public class SettingsStatus {
     public static boolean favoritePlaylistSearchEnabled = false;
     public static boolean likedVideosSearchEnabled = false;
     public static boolean chooseCollectionSearchEnabled = false;
+    public static boolean keepCollectionsLoadedEnabled = false;
+    public static boolean collectionSortEnabled = false;
+    public static boolean collectionVideosSearchEnabled = false;
 
     // Patched load() marks the features included in this APK. Run it before
     // any feature reads these flags, including feed hooks reached at startup.
@@ -186,6 +189,18 @@ public class SettingsStatus {
 
     public static void enableChooseCollectionSearch() {
         chooseCollectionSearchEnabled = true;
+    }
+
+    public static void enableKeepCollectionsLoaded() {
+        keepCollectionsLoadedEnabled = true;
+    }
+
+    public static void enableCollectionSort() {
+        collectionSortEnabled = true;
+    }
+
+    public static void enableCollectionVideosSearch() {
+        collectionVideosSearchEnabled = true;
     }
 
     public static void load() {

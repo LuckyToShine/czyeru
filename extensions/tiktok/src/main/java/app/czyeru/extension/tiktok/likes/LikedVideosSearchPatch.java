@@ -46,16 +46,7 @@ public final class LikedVideosSearchPatch {
         ListSearch.onResume(fragment);
     }
 
-    /** Matches the description, title, creator name and creator username. */
     private static boolean matches(Object item, String query) {
-        Object author = ListSearch.call(item, "getAuthor");
-        return ListSearch.containsAllWords(text(ListSearch.call(item, "getDesc")), query)
-                || ListSearch.containsAllWords(text(ListSearch.call(item, "getTitle")), query)
-                || ListSearch.containsAllWords(text(ListSearch.call(author, "getNickname")), query)
-                || ListSearch.containsAllWords(text(ListSearch.call(author, "getUniqueId")), query);
-    }
-
-    private static String text(Object value) {
-        return value instanceof String ? (String) value : null;
+        return ListSearch.awemeMatches(item, query);
     }
 }

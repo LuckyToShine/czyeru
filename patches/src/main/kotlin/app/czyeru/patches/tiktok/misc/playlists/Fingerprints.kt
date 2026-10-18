@@ -58,3 +58,33 @@ internal object CollectionListBindViewHolderFingerprint : Fingerprint(
             classDef.methods.any { it.name == "onCreateBasicViewHolder" }
     },
 )
+
+/**
+ * Page loader of VideoCollectionListViewModel (X.0Xh5, shared by the favorite playlists page and
+ * the "save to collection" sheet). Builds previous list + new page, then sets it as the state.
+ */
+internal object CollectionListPageLoadedFingerprint : Fingerprint(
+    name = "apply",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
+    strings = listOf("collection_tab_first_frame"),
+)
+
+/** Builds the RecyclerView of a collection's videos page. */
+internal object CollectionContentViewCreatedFingerprint : Fingerprint(
+    definingClass = "/CollectionContentAssem;",
+    name = "onViewCreated",
+    returnType = "V",
+    parameters = listOf("Landroid/view/View;"),
+)
+
+/** Bind method of the collection videos adapter: the only bind in a class holding CollectionContentAssem. */
+internal object CollectionContentBindViewHolderFingerprint : Fingerprint(
+    name = "onBindBasicViewHolder",
+    returnType = "V",
+    parameters = listOf("Landroidx/recyclerview/widget/RecyclerView\$ViewHolder;", "I"),
+    custom = { _, classDef ->
+        classDef.fields.any { it.type.endsWith("/CollectionContentAssem;") } &&
+            classDef.methods.any { it.name == "onCreateBasicViewHolder" }
+    },
+)

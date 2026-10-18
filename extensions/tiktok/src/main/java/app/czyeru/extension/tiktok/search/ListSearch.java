@@ -59,6 +59,8 @@ public final class ListSearch {
 
     private static final class FilterState {
         Matcher matcher;
+        /** The adapter clears its list and adds the whole new list on every change. */
+        boolean rebuilds;
         List full;
         List shown;
         List shownSnapshot;
@@ -91,7 +93,7 @@ public final class ListSearch {
             int margin = dp(context, SEARCH_MARGIN_DP);
             int gap = dp(context, SEARCH_GAP_DP);
 
-            EditText search = createSearchBox(recyclerView, hint, matcher);
+            EditText search = createSearchBox(recyclerView, hint, matcher, false);
             FrameLayout.LayoutParams searchParams = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     searchHeight,
@@ -123,6 +125,14 @@ public final class ListSearch {
      * If the parent has a fixed height (a bottom sheet), it is made taller by the bar's height.
      */
     public static void installWrapped(View recyclerView, String hint, Matcher matcher) {
+        installWrapped(recyclerView, hint, matcher, false);
+    }
+
+    /**
+     * @param rebuilds true when the adapter clears its list and adds the whole new list on every
+     *                 change, so a changed list is the new unfiltered source
+     */
+    public static void installWrapped(View recyclerView, String hint, Matcher matcher, boolean rebuilds) {
         try {
             ViewParent viewParent = recyclerView.getParent();
             if (!(viewParent instanceof ViewGroup)) {
@@ -139,7 +149,7 @@ public final class ListSearch {
             int margin = dp(context, SEARCH_MARGIN_DP);
             int gap = dp(context, SEARCH_GAP_DP);
 
-            EditText search = createSearchBox(recyclerView, hint, matcher);
+            EditText search = createSearchBox(recyclerView, hint, matcher, rebuilds);
 
             int index = parent.indexOfChild(recyclerView);
             ViewGroup.LayoutParams listParams = recyclerView.getLayoutParams();
@@ -176,7 +186,7 @@ public final class ListSearch {
         }
     }
 
-    private static EditText createSearchBox(View recyclerView, String hint, Matcher matcher) {
+    private static EditText createSearchBox(View recyclerView, String hint, Matcher matcher, boolean rebuilds) {
         Context context = recyclerView.getContext();
         boolean dark = isDarkMode(context);
 
@@ -215,7 +225,7 @@ public final class ListSearch {
 
             @Override
             public void afterTextChanged(Editable s) {
-                applyQuery(recyclerView, s.toString(), matcher);
+                applyQuery(recyclerView, s.toString(), matcher, rebuilds);
             }
         });
         return search;
@@ -291,7 +301,7 @@ public final class ListSearch {
 
     // region Filtering
 
-    private static void applyQuery(View recyclerView, String query, Matcher matcher) {
+    private static void applyQuery(View recyclerView, String query, Matcher matcher, boolean rebuilds) {
         try {
             Object adapter = invoke(recyclerView, "getAdapter");
             if (adapter == null) {
@@ -304,6 +314,7 @@ public final class ListSearch {
                 filterStates.put(adapter, state);
             }
             state.matcher = matcher;
+            state.rebuilds = rebuilds;
             state.query = query == null ? "" : fold(query.trim());
             applyFilter(adapter, state);
         } catch (Throwable throwable) {
@@ -318,6 +329,9 @@ public final class ListSearch {
         if (current != state.shown) {
             // New list from TikTok: it is the unfiltered source.
             state.full = current;
+        } else if (current != null && state.rebuilds && current.size() != state.shownSize) {
+            // TikTok cleared the list we set and added its whole new list to it.
+            state.full = new ArrayList(current);
         } else if (current != null && state.full != null && current.size() != state.shownSize) {
             // TikTok changed the list we set. Mirror its additions and removals in the source list.
             if (state.shownSnapshot != null) {
@@ -385,6 +399,22 @@ public final class ListSearch {
             }
         }
         return true;
+    }
+
+    /**
+     * Matches a video (Aweme) by description, title, creator name or creator username.
+     * Aweme and User keep their real getter names.
+     */
+    public static boolean awemeMatches(Object aweme, String query) {
+        Object author = call(aweme, "getAuthor");
+        return containsAllWords(text(call(aweme, "getDesc")), query)
+                || containsAllWords(text(call(aweme, "getTitle")), query)
+                || containsAllWords(text(call(author, "getNickname")), query)
+                || containsAllWords(text(call(author, "getUniqueId")), query);
+    }
+
+    private static String text(Object value) {
+        return value instanceof String ? (String) value : null;
     }
 
     // endregion

@@ -60,7 +60,7 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
         REGION("Region spoof", "Change the region TikTok reads."),
         SHARE_SHEET("Share sheet", "Send to, share via app, and video actions."),
         BEHAVIOR("App behavior", "Sharing, playback, and gestures."),
-        ERUDITE("Erudite Patches", "Favorite playlist grid and search."),
+        ERUDITE("Erudite Patches", "Collections, playlists and search."),
         DIAGNOSTICS("Diagnostics", "Logging, crash capture, and report export.");
 
         final String title;
@@ -324,12 +324,18 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
         if (SettingsStatus.favoritePlaylistGridEnabled
                 || SettingsStatus.favoritePlaylistSearchEnabled
                 || SettingsStatus.likedVideosSearchEnabled
-                || SettingsStatus.chooseCollectionSearchEnabled) {
+                || SettingsStatus.chooseCollectionSearchEnabled
+                || SettingsStatus.keepCollectionsLoadedEnabled
+                || SettingsStatus.collectionSortEnabled
+                || SettingsStatus.collectionVideosSearchEnabled) {
             addMenu(screen, Section.ERUDITE, SettingsMenuPreference.Icon.LAYOUT, countEnabled(
                     SettingsStatus.favoritePlaylistGridEnabled && Settings.FAVORITE_PLAYLIST_GRID.get(),
                     SettingsStatus.favoritePlaylistSearchEnabled && Settings.FAVORITE_PLAYLIST_SEARCH.get(),
                     SettingsStatus.likedVideosSearchEnabled && Settings.LIKED_VIDEOS_SEARCH.get(),
-                    SettingsStatus.chooseCollectionSearchEnabled && Settings.CHOOSE_COLLECTION_SEARCH.get()
+                    SettingsStatus.chooseCollectionSearchEnabled && Settings.CHOOSE_COLLECTION_SEARCH.get(),
+                    SettingsStatus.keepCollectionsLoadedEnabled && Settings.KEEP_COLLECTIONS_LOADED.get(),
+                    SettingsStatus.collectionSortEnabled && !"normal".equals(Settings.COLLECTION_SORT.get()),
+                    SettingsStatus.collectionVideosSearchEnabled && Settings.COLLECTION_VIDEOS_SEARCH.get()
             ));
         }
 
