@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.7.4](https://github.com/LuckyToShine/czyeru/releases/tag/v1.7.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;54 patches total
+> **[v1.7.5](https://github.com/LuckyToShine/czyeru/releases/tag/v1.7.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;57 patches total
 <details open>
 <summary>📦 Conexión Lince UVM&nbsp;&nbsp;•&nbsp;&nbsp;3 patches</summary>
 <br>
@@ -49,7 +49,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 </details>
 
 <details open>
-<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;46 patches</summary>
+<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;49 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -61,6 +61,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 |----------|----------------|-----------|
 | [Always show publish date](#always-show-publish-date) | Always shows the publish date in video author information. Thanks to lyyako for the original implementation. |  |
 | [Collection picker search](#collection-picker-search) | Adds an option to show a search bar on the sheet where you pick the collection for a saved video, so you do not have to scroll through every collection. |  |
+| [Collection videos search](#collection-videos-search) | Adds an option to show a search bar inside a collection that filters loaded videos by description or creator. |  |
 | [Comment sort controls](#comment-sort-controls) | Exposes TikTok's native full comment-sort sheet, including its hot, time, media, and creator modes, instead of relying on rollout gates. |  |
 | [Copy comments without username](#copy-comments-without-username) | Copies only the comment text without including the creator's username. |  |
 | [Custom offline videos limit](#custom-offline-videos-limit) | Adds a custom entry to TikTok's offline videos menu with a configurable limit from 1 to 1000 videos. |  |
@@ -92,6 +93,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Hide quick comment reactions](#hide-quick-comment-reactions) | Hides TikTok's exposed quick emoji row in supported comment inputs. |  |
 | [Hide suggested accounts](#hide-suggested-accounts) | Removes suggested-account cards from profile and inbox surfaces. Thanks to tymmesyde for the original implementation. |  |
 | [Hold-and-slide 2x lock](#hold-and-slide-2x-lock) | Enables TikTok's native hold, slide down, and release gesture to lock 2x speed. |  |
+| [Keep collections loaded](#keep-collections-loaded) | Adds an option to remember every collection you have loaded, so the collections page and the save sheet show them all right away instead of loading them page by page again. |  |
 | [Liked videos search](#liked-videos-search) | Adds an option to show a search bar on the liked videos page that filters loaded videos by description or creator. |  |
 | [Open external links directly](#open-external-links-directly) | Opens profile and story website links in the system browser instead of TikTok's in-app browser. Thanks to lyyako for the original implementation. |  |
 | [Playback speed](#playback-speed) | Enables playback-speed controls for all videos and remembers the selected speed between videos. |  |
@@ -103,6 +105,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Share sheet modification](#share-sheet-modification) | Adds toggles and allow-lists for the video share sheet's "Send to", "Share via app", and "Video Actions" sections. |  |
 | [Show seekbar](#show-seekbar) | Shows TikTok's native video seekbar where it would normally be hidden. |  |
 | [Show seekbar thumbnail](#show-seekbar-thumbnail) | Shows TikTok's video preview thumbnail while dragging the seekbar. |  |
+| [Sort collections](#sort-collections) | Adds an option to sort collections by recent activity (normal), by video count (most first) or by reverse video count (fewest first). |  |
 | [Stop video looping](#stop-video-looping) | Stops videos at the end instead of replaying them. |  |
 | [Translate comments](#translate-comments) | Adds comment translation controls using TikTok's translation system, with selectable language exclusions. |  |
 

@@ -1,3 +1,9 @@
+## [1.7.5](https://github.com/LuckyToShine/czyeru/compare/v1.7.4...v1.7.5) (2026-10-18)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** add Keep collections loaded, Sort collections and Collection videos search ([9fd0b35](https://github.com/LuckyToShine/czyeru/commit/9fd0b351de378d92c4ec75bcb7f4894524667827))
+
 ## [1.7.4](https://github.com/LuckyToShine/czyeru/compare/v1.7.3...v1.7.4) (2026-10-15)
 
 ### 🐛 Bug Fixes
