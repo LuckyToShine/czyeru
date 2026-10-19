@@ -141,6 +141,17 @@ internal class HermesBundle(val bytes: ByteArray) {
         return StringLocation(utf16, storage + offset, length)
     }
 
+    /** Where the table entry of string [index] is stored. */
+    fun stringEntryOffset(index: Int) = smallStrings + 4 * index
+
+    /** Shortens a string that is stored in the table itself (not in the overflow table) to [length] characters. */
+    fun setStringLength(index: Int, length: Int) {
+        val at = stringEntryOffset(index)
+        val word = word(at)
+        ensure(((word ushr 24) and 0xFF) != 0xFF && length in 0..254) { "The string has no room for a new length" }
+        buffer.putInt(at, (word and 0x00FFFFFF) or (length shl 24))
+    }
+
     fun string(index: Int): String {
         val location = stringLocation(index)
         val charset = if (location.utf16) Charsets.UTF_16LE else Charsets.ISO_8859_1
