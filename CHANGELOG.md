@@ -1,3 +1,9 @@
+## [1.7.6](https://github.com/LuckyToShine/czyeru/compare/v1.7.5...v1.7.6) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **uvm:** add Keep session open patch ([1241d21](https://github.com/LuckyToShine/czyeru/commit/1241d2129dfea982c967dd46d13e702108816b6a))
+
 ## [1.7.5](https://github.com/LuckyToShine/czyeru/compare/v1.7.4...v1.7.5) (2026-10-18)
 
 ### 🐛 Bug Fixes
