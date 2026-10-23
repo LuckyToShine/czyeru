@@ -22,7 +22,7 @@ val customOfflineVideosLimitPatch = bytecodePatch(
     description = "Adds a custom entry to TikTok's offline videos menu with a configurable limit from 1 to 1000 videos.",
     default = true,
 ) {
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         OfflineModeSheetOptionsFingerprint.method.apply {
@@ -47,45 +47,40 @@ val customOfflineVideosLimitPatch = bytecodePatch(
             )
         }
 
-        OfflineModeOptionConfigFingerprint.method.apply {
-            fun postProcessOptionsField(fieldName: String) {
-                val fieldWriteIndex = indexOfFirstInstructionOrThrow {
-                    opcode == Opcode.SPUT_OBJECT &&
-                        getReference<FieldReference>()?.let { field ->
-                            field.definingClass == "LX/0wj1;" &&
-                                field.name == fieldName &&
-                                field.type == "Ljava/util/List;"
-                        } == true
-                }
-                val moveResultIndex = indexOfFirstInstructionReversedOrThrow(fieldWriteIndex - 1) {
-                    opcode == Opcode.MOVE_RESULT_OBJECT
-                }
-                val optionsRegister = getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
+        OfflineModeOptionConfigFingerprint.let { fingerprint ->
+            // Four option lists: 50..200, 60..480 and a reduced variant of each. TikTok picks
+            // one of them at runtime, so every one of them gets the custom entry.
+            val method = fingerprint.method
+            val fields = ownListFieldWrites(method, fingerprint.classDef.type)
+            method.apply {
+                fields.forEach { target ->
+                    val fieldWriteIndex = indexOfFirstInstructionOrThrow {
+                        opcode == Opcode.SPUT_OBJECT && getReference<FieldReference>() == target
+                    }
+                    val moveResultIndex = indexOfFirstInstructionReversedOrThrow(fieldWriteIndex - 1) {
+                        opcode == Opcode.MOVE_RESULT_OBJECT
+                    }
+                    val optionsRegister = getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
 
-                addInstructions(
-                    moveResultIndex + 1,
-                    """
-                        invoke-static {v$optionsRegister}, $CUSTOM_OFFLINE_VIDEOS_HELPER->getOfflineVideoOptions(Ljava/util/List;)Ljava/util/List;
-                        move-result-object v$optionsRegister
-                    """,
-                )
+                    addInstructions(
+                        moveResultIndex + 1,
+                        """
+                            invoke-static {v$optionsRegister}, $CUSTOM_OFFLINE_VIDEOS_HELPER->getOfflineVideoOptions(Ljava/util/List;)Ljava/util/List;
+                            move-result-object v$optionsRegister
+                        """,
+                    )
+                }
             }
-
-            // 47.2.41 keeps four option lists: 50..200 (LJFF), 60..480 (LJI) and a reduced variant
-            // of each (LJIIIIZZ, LJII). TikTok picks one of them at runtime.
-            postProcessOptionsField("LJFF")
-            postProcessOptionsField("LJI")
-            postProcessOptionsField("LJII")
-            postProcessOptionsField("LJIIIIZZ")
         }
 
+        val optionEnumType = OfflineModeOptionEnumFingerprint.classDef.type
         OfflineModeOptionEnumFingerprint.method.apply {
             val customEnumFieldWriteIndex = indexOfFirstInstructionOrThrow {
                 opcode == Opcode.SPUT_OBJECT &&
                     getReference<FieldReference>()?.let { field ->
-                        field.definingClass == "LX/0wiM;" &&
+                        field.definingClass == optionEnumType &&
                             field.name == "DOWNLOAD_200_VIDEOS" &&
-                            field.type == "LX/0wiM;"
+                            field.type == optionEnumType
                     } == true
             }
             val customEnumConstructorIndex = indexOfFirstInstructionReversedOrThrow(
@@ -93,7 +88,7 @@ val customOfflineVideosLimitPatch = bytecodePatch(
             ) {
                 (opcode == Opcode.INVOKE_DIRECT || opcode == Opcode.INVOKE_DIRECT_RANGE) &&
                     getReference<MethodReference>()?.let { reference ->
-                        reference.definingClass == "LX/0wiM;" &&
+                        reference.definingClass == optionEnumType &&
                             reference.name == "<init>" &&
                             reference.returnType == "V" &&
                             reference.parameterTypes.size == 5

@@ -75,7 +75,7 @@ val keepCollectionsLoadedPatch = bytecodePatch(
 ) {
     dependsOn(collectionListHookPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(
@@ -94,7 +94,7 @@ val sortCollectionsPatch = bytecodePatch(
 ) {
     dependsOn(collectionListHookPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(

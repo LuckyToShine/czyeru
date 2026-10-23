@@ -22,7 +22,7 @@ val showSeekbarPatch = bytecodePatch(
 ) {
     dependsOn(sharedExtensionPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         // This target is TikTok's short predicate used by the feed progress UI.
@@ -59,7 +59,7 @@ val showSeekbarThumbnailPatch = bytecodePatch(
     default = true,
 ) {
     dependsOn(sharedExtensionPatch)
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(

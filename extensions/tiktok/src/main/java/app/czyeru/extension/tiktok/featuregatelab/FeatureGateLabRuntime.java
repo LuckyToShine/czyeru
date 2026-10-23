@@ -718,9 +718,13 @@ public final class FeatureGateLabRuntime {
             if (className.startsWith("app.czyeru.extension.tiktok.featuregatelab")
                     || className.startsWith("java.lang.Thread")
                     || className.startsWith("dalvik.system.VMStack")
+                    // AB wrappers: 47.2.41 names first, then 47.4.3 (X.02yS, X.032O, X.03gl).
                     || className.equals("X.09se")
                     || className.equals("X.09tK")
                     || className.equals("X.09tC")
+                    || className.equals("X.02yS")
+                    || className.equals("X.032O")
+                    || className.equals("X.03gl")
                     || className.equals("com.bytedance.ies.abmock.SettingsManager")
                     || className.equals("com.bytedance.android.live_settings.SettingsManager")
                     || className.equals("com.ss.android.vesdk.VEConfigCenter")

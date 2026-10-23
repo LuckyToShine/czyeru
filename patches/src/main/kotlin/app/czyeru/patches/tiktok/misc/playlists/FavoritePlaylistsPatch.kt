@@ -52,7 +52,7 @@ val favoritePlaylistGridPatch = bytecodePatch(
 ) {
     dependsOn(favoritePlaylistsHooksPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(
@@ -124,7 +124,7 @@ val favoritePlaylistSearchPatch = bytecodePatch(
 ) {
     dependsOn(favoritePlaylistsHooksPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(

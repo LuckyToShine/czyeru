@@ -150,12 +150,27 @@ public final class CommentBatchTranslator {
     public static void onNativeBatchComplete(Object runner) {
         if (!BaseSettings.DEBUG.get()) return;
 
+        // 47.2.41 merges the callback into a lambda group (`l0` results, `l1` task); 47.4.3 gives it
+        // its own class with the results list first and the task after it.
         Object results = readFieldQuiet(runner, "l0");
         Object task = readFieldQuiet(runner, "l1");
-        Object requested = readFieldQuiet(task, "LIZ");
+        if (results == null && task == null && runner != null) {
+            for (java.lang.reflect.Field field : runner.getClass().getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(runner);
+                    if (results == null && value instanceof java.util.List) results = value;
+                    else if (task == null && value != null && !(value instanceof java.util.List)) task = value;
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+        int requestedSize = collectionSize(readFieldQuiet(task, "LIZ"));
+        int resultSize = collectionSize(results);
         Logger.printInfo(() -> "[Morphe CommentBatchTranslator] native.complete"
-                + " requestedSize=" + collectionSize(requested)
-                + " resultSize=" + collectionSize(results));
+                + " requestedSize=" + requestedSize
+                + " resultSize=" + resultSize);
     }
 
     private static void translateLoadedBatchIfReady(Object anchor, boolean allowVisibleFallback) {

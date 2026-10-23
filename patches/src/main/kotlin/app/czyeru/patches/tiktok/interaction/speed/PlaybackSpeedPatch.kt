@@ -25,7 +25,7 @@ val playbackSpeedPatch = bytecodePatch(
 ) {
     dependsOn(sharedExtensionPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         PlaybackSpeedSelectionBoundaryFingerprint.method.addInstruction(

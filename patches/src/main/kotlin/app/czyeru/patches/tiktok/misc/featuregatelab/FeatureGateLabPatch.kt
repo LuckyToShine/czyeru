@@ -9,10 +9,10 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.czyeru.patches.shared.compat.AppCompatibilities
-import app.czyeru.patches.tiktok.misc.absettings.APP_AB_DESCRIPTOR
 import app.czyeru.patches.tiktok.misc.absettings.APP_AB_INT_KEY_REGISTER
 import app.czyeru.patches.tiktok.misc.absettings.APP_AB_INT_METHOD
 import app.czyeru.patches.tiktok.misc.absettings.APP_AB_INT_PARAMETERS
+import app.czyeru.patches.tiktok.misc.absettings.appAbClassType
 import app.czyeru.patches.tiktok.misc.settings.settingsPatch
 import app.czyeru.util.cloneMutableAndPreserveParameters
 import com.android.tools.smali.dexlib2.Opcode
@@ -24,6 +24,8 @@ private const val ACTIVITY_CENTER_DESCRIPTOR = "Lcom/ss/android/ugc/tiktok/pns/a
 private const val VE_CONFIG_DESCRIPTOR = "Lcom/ss/android/vesdk/VEConfigCenter;"
 private const val PLAYER_SETTING_SERVICE_DESCRIPTOR =
     "Lcom/ss/android/ugc/aweme/video/simplayer/PlayerSettingServiceImpl;"
+/** Stands in for the app AB class, which is renamed on every build and resolved by shape. */
+private const val APP_AB_DESCRIPTOR = "<app-ab>"
 private const val RUNTIME_DESCRIPTOR = "Lapp/czyeru/extension/tiktok/featuregatelab/FeatureGateLabRuntime;"
 
 private data class TypedBoundary(
@@ -72,20 +74,23 @@ val featureGateLabPatch = bytecodePatch(
     default = true,
 ) {
     dependsOn(settingsPatch)
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
+        val appAbDescriptor = appAbClassType()
         boundaries.forEach { boundary ->
-            val target = mutableClassDefBy(boundary.targetDescriptor)
+            val target = mutableClassDefBy(
+                boundary.targetDescriptor.takeUnless { it == APP_AB_DESCRIPTOR } ?: appAbDescriptor,
+            )
             val method = target.methods.singleOrNull {
                 it.name == boundary.methodName &&
                     it.returnType == boundary.returnType &&
                     it.parameterTypes == boundary.parameters
-            } ?: throw PatchException("Feature Gate Lab boundary not found: ${boundary.targetDescriptor}->${boundary.methodName}${boundary.parameters}")
+            } ?: throw PatchException("Feature Gate Lab boundary not found: ${target.type}->${boundary.methodName}${boundary.parameters}")
             method.patchBoundary(boundary)
         }
 
-        val rawAbmock = mutableClassDefBy(APP_AB_DESCRIPTOR)
+        val rawAbmock = mutableClassDefBy(appAbDescriptor)
         val rawGetter = rawAbmock.methods.singleOrNull {
             it.name == "LJIIJJI" &&
                 it.returnType == "Ljava/lang/Object;" &&

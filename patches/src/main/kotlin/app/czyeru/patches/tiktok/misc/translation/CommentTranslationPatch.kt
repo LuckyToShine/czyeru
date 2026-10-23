@@ -24,7 +24,7 @@ val commentTranslationPatch = bytecodePatch(
 ) {
     dependsOn(sharedExtensionPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(
@@ -97,7 +97,7 @@ val commentTranslationPatch = bytecodePatch(
         MultiCommentTranslationStartFingerprint.method.addInstructions(
             0,
             """
-                invoke-static/range {v16 .. v18}, $EXTENSION_CLASS_DESCRIPTOR->onNativeBatchStart(Ljava/lang/Object;Ljava/lang/Object;Z)V
+                invoke-static/range {p1 .. p3}, $EXTENSION_CLASS_DESCRIPTOR->onNativeBatchStart(Ljava/lang/Object;Ljava/lang/Object;Z)V
             """,
         )
 

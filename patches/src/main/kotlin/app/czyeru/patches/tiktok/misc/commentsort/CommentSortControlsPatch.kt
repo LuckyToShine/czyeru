@@ -9,10 +9,12 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import app.czyeru.patches.shared.compat.AppCompatibilities
 import app.czyeru.patches.tiktok.misc.extension.sharedExtensionPatch
 import app.czyeru.patches.tiktok.misc.settings.SettingsStatusLoadFingerprint
+import app.czyeru.util.getReference
 import app.czyeru.util.indexOfFirstInstructionOrThrow
 import app.czyeru.util.indexOfFirstStringInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val EXTENSION_CLASS_DESCRIPTOR =
     "Lapp/czyeru/extension/tiktok/commentsort/CommentSortControls;"
@@ -26,7 +28,7 @@ val commentSortControlsPatch = bytecodePatch(
 ) {
     dependsOn(sharedExtensionPatch)
 
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         SettingsStatusLoadFingerprint.method.addInstruction(
@@ -51,7 +53,10 @@ val commentSortControlsPatch = bytecodePatch(
             )
         }
 
-        CommentSortEligibilityFingerprint.method.apply {
+        val eligibilityClass = CommentSortOptionStyleFingerprint.method.implementation!!.instructions
+            .first { it.opcode == Opcode.SGET_OBJECT }
+            .getReference<FieldReference>()!!.definingClass
+        mutableClassDefBy(eligibilityClass).methods.single(::isCommentSortEligibilityMethod).apply {
             addInstructionsWithLabels(
                 0,
                 """

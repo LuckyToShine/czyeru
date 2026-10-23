@@ -23,6 +23,7 @@ internal object OnRenderFirstFrameFingerprint : Fingerprint(
     definingClass = "/feed/controller/PlayerController;",
     name = "onRenderFirstFrame",
     returnType = "V",
-    parameters = listOf("LX/0qPZ;"),
+    // The first-frame event, LX/0qPZ; on 47.2.41 and LX/09cW; on 47.4.3.
+    parameters = listOf("L"),
 )
 

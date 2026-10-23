@@ -117,7 +117,8 @@ final class SettingsManagerObservationRecorder {
 
     private static boolean calledFromDefaultWrapper() {
         for (StackTraceElement frame : Thread.currentThread().getStackTrace()) {
-            if ("X.09tC".equals(frame.getClassName())) {
+            // The SettingsManager default wrapper: X.09tC on TikTok 47.2.41, X.03gl on 47.4.3.
+            if ("X.09tC".equals(frame.getClassName()) || "X.03gl".equals(frame.getClassName())) {
                 return true;
             }
         }
@@ -163,7 +164,9 @@ final class SettingsManagerObservationRecorder {
                     || className.equals("com.bytedance.ies.abmock.SettingsManager")
                     || className.equals("com.bytedance.android.live_settings.SettingsManager")
                     || className.equals("X.09tC")
-                    || className.equals("X.09tK")) {
+                    || className.equals("X.09tK")
+                    || className.equals("X.03gl")
+                    || className.equals("X.032O")) {
                 continue;
             }
             return className + "#" + frame.getMethodName()

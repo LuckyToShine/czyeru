@@ -1,6 +1,7 @@
 package app.czyeru.patches.tiktok.misc.translation
 
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
 import app.czyeru.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -209,10 +210,17 @@ internal object CommentListLoadedFingerprint : Fingerprint(
     },
 )
 
+/**
+ * The batch completion callback. 47.2.41 merges it into a static `run$N(self)`, 47.4.3 keeps it as
+ * an instance `run()`, so `p0` is the callback object either way.
+ */
 internal object MultiCommentTranslationCompleteFingerprint : Fingerprint(
     returnType = "V",
-    parameters = listOf("L"),
     strings = listOf("MultiCommentTranslationTask startTranslate onComplete "),
+    custom = { method, _ ->
+        if (AccessFlags.STATIC.isSet(method.accessFlags)) method.parameterTypes.size == 1
+        else method.parameterTypes.isEmpty()
+    },
 )
 
 internal object MultiCommentTranslationCacheCopyFingerprint : Fingerprint(

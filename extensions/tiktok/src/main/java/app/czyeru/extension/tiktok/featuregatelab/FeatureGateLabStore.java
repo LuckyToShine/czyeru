@@ -23,7 +23,9 @@ import java.util.Map;
 import app.czyeru.extension.shared.Utils;
 
 public final class FeatureGateLabStore {
-    public static final String TARGET_VERSION = "47.2.41";
+    /** Used only when the running TikTok's version cannot be read. */
+    private static final String FALLBACK_TARGET_VERSION = "47.2.41";
+    private static volatile String targetVersion;
     public static final String MANAGER_ABMOCK = "abmock";
     public static final String MANAGER_PLAYER_CONFIG = "player_config";
     public static final String MANAGER_LIVE = "live";
@@ -146,7 +148,7 @@ public final class FeatureGateLabStore {
         if (prefs != null) {
             prefs.edit()
                     .clear()
-                    .putString(STORED_TARGET_VERSION_KEY, TARGET_VERSION)
+                    .putString(STORED_TARGET_VERSION_KEY, targetVersion())
                     .apply();
         }
         FeatureGateLabRuntime.clearTriggered();
@@ -158,7 +160,7 @@ public final class FeatureGateLabStore {
         JSONObject root = new JSONObject();
         root.put("schema", 1);
         root.put("target", "TikTok global");
-        root.put("tiktok_version", TARGET_VERSION);
+        root.put("tiktok_version", targetVersion());
         JSONArray rules = new JSONArray();
         for (Rule rule : rules()) {
             JSONObject item = new JSONObject();
@@ -176,8 +178,8 @@ public final class FeatureGateLabStore {
     public static ImportReview reviewProfile(String text, Map<String, FeatureGateCatalog.Entry> catalog) throws JSONException {
         JSONObject root = new JSONObject(text);
         String version = root.optString("tiktok_version", "");
-        if (!TARGET_VERSION.equals(version)) {
-            throw new JSONException("Profile targets TikTok " + version + "; this Lab requires " + TARGET_VERSION);
+        if (!targetVersion().equals(version)) {
+            throw new JSONException("Profile targets TikTok " + version + "; this Lab requires " + targetVersion());
         }
 
         JSONArray items = root.optJSONArray("rules");
@@ -382,6 +384,27 @@ public final class FeatureGateLabStore {
         return result.toString();
     }
 
+    /**
+     * The TikTok version the Lab's rules belong to: the one running. Rules and exports are tied to
+     * it because gate keys and value types change between builds, so a different TikTok turns the
+     * saved rules off rather than applying them blind.
+     */
+    public static String targetVersion() {
+        String version = targetVersion;
+        if (version != null) return version;
+        Context context = Utils.getContext();
+        if (context == null) return FALLBACK_TARGET_VERSION;
+        try {
+            version = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (Throwable ignored) {
+            version = null;
+        }
+        if (version == null || version.isEmpty()) version = FALLBACK_TARGET_VERSION;
+        targetVersion = version;
+        return version;
+    }
+
     private static SharedPreferences prefs() {
         Context context = Utils.getContext();
         if (context == null) {
@@ -394,14 +417,14 @@ public final class FeatureGateLabStore {
 
     private static synchronized void ensureTargetVersion(SharedPreferences prefs) {
         String storedVersion = prefs.getString(STORED_TARGET_VERSION_KEY, "");
-        if (TARGET_VERSION.equals(storedVersion)) {
+        if (targetVersion().equals(storedVersion)) {
             return;
         }
 
         List<String> ids = ruleIds(prefs);
         boolean hadSavedState = prefs.getBoolean(MASTER_KEY, false) || !ids.isEmpty();
         SharedPreferences.Editor editor = prefs.edit()
-                .putString(STORED_TARGET_VERSION_KEY, TARGET_VERSION)
+                .putString(STORED_TARGET_VERSION_KEY, targetVersion())
                 .putBoolean(MASTER_KEY, false);
         for (String id : ids) {
             editor.putBoolean("rule." + id + ".enabled", false);

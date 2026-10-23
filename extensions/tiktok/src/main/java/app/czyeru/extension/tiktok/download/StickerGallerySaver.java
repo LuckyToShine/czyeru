@@ -88,7 +88,7 @@ public final class StickerGallerySaver {
                 return;
             }
 
-            List<View> actionButtons = findViewsByClassName(sheetView, "X.0HLX", "LX.0HLX");
+            List<View> actionButtons = findViewsByClassName(sheetView, actionButtonClassNames(sheetView));
             ViewGroup actionParent = findCommonParent(actionButtons);
             if (actionParent == null || actionButtons.size() < 2 || hasSaveImageButton(actionParent)) {
                 debugLog("[Morphe Stickers] action parent unavailable buttons=" + actionButtons.size());
@@ -659,8 +659,17 @@ public final class StickerGallerySaver {
             return source;
         }
 
+        // The StickerItem helper is X.13Iz on TikTok 47.2.41 and X.0dnr on 47.4.3.
+        for (String helperName : new String[]{"X.13Iz", "X.0dnr"}) {
+            Object value = resolveSourceStickerWith(helperName, source);
+            if (value != null) return value;
+        }
+        return null;
+    }
+
+    private static Object resolveSourceStickerWith(String helperName, Object source) {
         try {
-            Class<?> helperClass = Class.forName("X.13Iz");
+            Class<?> helperClass = Class.forName(helperName);
             for (java.lang.reflect.Method method : helperClass.getDeclaredMethods()) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())
@@ -810,6 +819,29 @@ public final class StickerGallerySaver {
         }
 
         return null;
+    }
+
+    /**
+     * The preview sheet's action button class: X.0HLX on TikTok 47.2.41 and X.0Coz on 47.4.3. The
+     * sheet binds each button through a void (button, model) method of its own, so the button type
+     * is also read from there for builds not listed here.
+     */
+    private static String[] actionButtonClassNames(View sheetView) {
+        List<String> names = new ArrayList<>(java.util.Arrays.asList("X.0HLX", "LX.0HLX", "X.0Coz"));
+        try {
+            for (java.lang.reflect.Method method : sheetView.getClass().getDeclaredMethods()) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (method.getReturnType() == Void.TYPE
+                        && parameterTypes.length == 2
+                        && View.class.isAssignableFrom(parameterTypes[0])
+                        && !names.contains(parameterTypes[0].getName())) {
+                    names.add(parameterTypes[0].getName());
+                }
+            }
+        } catch (Throwable ignored) {
+            // The known names above still apply.
+        }
+        return names.toArray(new String[0]);
     }
 
     private static List<View> findViewsByClassName(View root, String... classNames) {

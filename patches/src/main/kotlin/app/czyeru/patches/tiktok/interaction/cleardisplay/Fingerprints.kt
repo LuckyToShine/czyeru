@@ -13,16 +13,18 @@ internal object OnClearDisplayEventFingerprint : Fingerprint(
     },
 )
 
-/** The extracted body of PlayerController.onRenderFirstFrame in TikTok 47.2.41. */
+/**
+ * The extracted body of PlayerController.onRenderFirstFrame: the only static `(PlayerController,
+ * event)V` on the class (`LLIZLLLIL` on 47.2.41, `LLILZIL` on 47.4.3).
+ */
 internal object OnRenderFirstFrameBodyFingerprint : Fingerprint(
     definingClass = "/feed/controller/PlayerController;",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "V",
     parameters = listOf(
         "Lcom/ss/android/ugc/aweme/feed/controller/PlayerController;",
-        "LX/0qPZ;",
+        "L",
     ),
-    custom = { method, _ -> method.name == "LLIZLLLIL" },
 )
 
 internal object ClearModeLogCoreFingerprint : Fingerprint(

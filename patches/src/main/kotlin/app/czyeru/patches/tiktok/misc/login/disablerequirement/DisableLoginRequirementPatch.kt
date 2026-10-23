@@ -14,7 +14,7 @@ val disableLoginRequirementPatch = bytecodePatch(
     description = "Removes TikTok's mandatory login gate from supported flows.",
     default = true,
 ) {
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
 
     execute {
         listOf(

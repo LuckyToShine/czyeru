@@ -4,14 +4,24 @@
  */
 package app.czyeru.patches.tiktok.interaction.resume
 
+import app.czyeru.util.getReference
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
+/**
+ * The lazy lambda that turns `FeedPlayProgressContinueConfig.enable` into the continue flag
+ * (`LX/0MuL;` on 47.2.41, `LX/08V3;` on 47.4.3).
+ */
 internal object FeedProgressContinueGateFingerprint : Fingerprint(
     returnType = "Ljava/lang/Object;",
     parameters = emptyList(),
-    custom = { method, classDef ->
-        classDef.type == "LX/0MuL;" &&
-            method.name == "invoke"
+    custom = { method, _ ->
+        method.name == "invoke" && method.implementation?.instructions?.any { instruction ->
+            instruction.getReference<FieldReference>()?.let {
+                it.definingClass == "Lcom/ss/android/ugc/aweme/feed/experiment/FeedPlayProgressContinueConfig;" &&
+                    it.name == "enable"
+            } == true
+        } == true
     },
 )
 

@@ -8,22 +8,13 @@ import app.morphe.patcher.Fingerprint
 
 /**
  * Decides whether the exposed quick emoji row is shown for a comment input
- * (`BaseSlotComponentTrigger.Jp(CommentContextSource, state)`, TikTok 47.2.41).
+ * (`BaseSlotComponentTrigger` `(CommentContextSource, state)Z`, named `Jp` on 47.2.41 and `hq` on
+ * 47.4.3, so only the signature is kept).
  */
 internal object QuickCommentReactionGateFingerprint : Fingerprint(
     definingClass = "Lcom/ss/android/ugc/aweme/comment/keyboard/keyboardv2/refactor/ExposedEmojiPanelTrigger;",
-    name = "Jp",
     returnType = "Z",
     parameters = listOf("Lcom/ss/android/ugc/aweme/comment/model/CommentContextSource;", "L"),
-)
-
-internal object LongPressQuickShareGateFingerprint : Fingerprint(
-    returnType = "I",
-    parameters = emptyList(),
-    custom = { method, classDef ->
-        classDef.type == "LX/09fy;" &&
-            method.name == "LIZ"
-    },
 )
 
 internal object LongPressRepostGateFingerprint : Fingerprint(

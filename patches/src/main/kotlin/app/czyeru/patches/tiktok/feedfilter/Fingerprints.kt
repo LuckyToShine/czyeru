@@ -315,23 +315,54 @@ internal object ColdStartOfflineCachedFeedFingerprint : Fingerprint(
 )
 
 /**
- * Cache-source chain callbacks (TikTok 47.2.41). Both are `public final LIZ(X/0Amu;)V` and walk to the next
- * cache source when the delivered result is unusable. They differ only in how they dispatch the next source.
+ * Cache-source chain callbacks. Both are `public final V(result)` and walk to the next cache source
+ * when the delivered result is unusable (`LX/0Amz;`/`LX/0An2;` on 47.2.41, `LX/0DJI;`/`LX/0bfO;`
+ * on 47.4.3). They close with a static call into the chain's singleton, the one they also read for
+ * logging, and differ only in what they hand it: the delivery callback passes its own node and
+ * checks the node's `next` link before that, the linked one passes `next` straight away.
  */
+private fun cacheChainCallbackShape(
+    method: com.android.tools.smali.dexlib2.iface.Method,
+    linked: Boolean,
+): Boolean {
+    if (method.parameterTypes.size != 1) return false
+    val instructions = method.implementation?.instructions?.toList() ?: return false
+    val usesClaimFlag = instructions.any { instruction ->
+        instruction.getReference<MethodReference>()?.let {
+            it.definingClass == "Ljava/util/concurrent/atomic/AtomicBoolean;" && it.name == "compareAndSet"
+        } == true
+    }
+    if (!usesClaimFlag) return false
+    val singleton = instructions.firstOrNull {
+        it.opcode == com.android.tools.smali.dexlib2.Opcode.SGET_OBJECT
+    }?.getReference<FieldReference>()?.type ?: return false
+    val readsSuccessFlag = instructions.any { instruction ->
+        instruction.opcode == com.android.tools.smali.dexlib2.Opcode.IGET_BOOLEAN &&
+            instruction.getReference<FieldReference>()?.definingClass == method.parameterTypes.single().toString()
+    }
+    if (!readsSuccessFlag) return false
+    val lastStaticIndex = instructions.indexOfLast { it.opcode == com.android.tools.smali.dexlib2.Opcode.INVOKE_STATIC }
+    if (lastStaticIndex < 1) return false
+    val lastStatic = instructions[lastStaticIndex].getReference<MethodReference>() ?: return false
+    if (lastStatic.definingClass != singleton || lastStatic.returnType != "V" || lastStatic.parameterTypes.size != 2) {
+        return false
+    }
+    val previous = instructions[lastStaticIndex - 1]
+    val passesNextLink = previous.opcode == com.android.tools.smali.dexlib2.Opcode.IGET_OBJECT &&
+        previous.getReference<FieldReference>()?.let { it.definingClass == it.type } == true
+    return passesNextLink == linked
+}
+
 internal object CacheChainDeliveryFingerprint : Fingerprint(
-    definingClass = "LX/0Amz;",
-    name = "LIZ",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     returnType = "V",
-    parameters = listOf("LX/0Amu;"),
+    custom = { method, _ -> cacheChainCallbackShape(method, linked = false) },
 )
 
 internal object CacheChainDeliveryLinkedFingerprint : Fingerprint(
-    definingClass = "LX/0An2;",
-    name = "LIZ",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     returnType = "V",
-    parameters = listOf("LX/0Amu;"),
+    custom = { method, _ -> cacheChainCallbackShape(method, linked = true) },
 )
 
 internal object InsertCacheWhenPlayLagFingerprint : Fingerprint(
@@ -472,11 +503,12 @@ internal object ProfileDetailAdEventFingerprint : Fingerprint(
     },
 )
 
+/** `lq(Z)V` on 47.2.41, `fq(Z)V` on 47.4.3: the setter that toggles the right-rail AI slot. */
 internal object TakoAiFeedButtonSetVisibleFingerprint : Fingerprint(
     definingClass = "/feed/assem/tikbot/TakoAssem;",
-    name = "lq",
     returnType = "V",
     parameters = listOf("Z"),
+    strings = listOf("right_container_chat_gpt"),
 )
 
 internal object FollowFeedPresenterPostProcessFingerprint : Fingerprint(

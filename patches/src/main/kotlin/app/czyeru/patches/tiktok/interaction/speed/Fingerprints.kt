@@ -22,11 +22,12 @@ internal object PlaybackSpeedSelectionBoundaryFingerprint : Fingerprint(
     ),
 )
 
+/** `LJJIJL(F)V` on 47.2.41 and `LIZ(F)V` on 47.4.3; the one that logs the speed change. */
 internal object PlayerControllerSetSpeedFingerprint : Fingerprint(
     definingClass = "/feed/controller/PlayerController;",
-    name = "LJJIJL",
     returnType = "V",
     parameters = listOf("F"),
+    strings = listOf("speed_begin"),
 )
 
 internal object SetSpeedFingerprint : Fingerprint(

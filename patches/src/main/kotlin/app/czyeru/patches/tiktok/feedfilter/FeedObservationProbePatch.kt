@@ -53,7 +53,7 @@ private object WhyThisPostValidationResponseCtorFingerprint : Fingerprint(
 )
 internal val feedObservationProbeHooksPatch = bytecodePatch {
     dependsOn(sharedExtensionPatch)
-    compatibleWith(*AppCompatibilities.tiktok47241())
+    compatibleWith(*AppCompatibilities.tiktok())
     execute {
         // The why-this-post probes are optional. TikTok reshapes this screen between releases, so each hook is
         // installed only when its target still has the expected shape; the remaining probes do not depend on it.

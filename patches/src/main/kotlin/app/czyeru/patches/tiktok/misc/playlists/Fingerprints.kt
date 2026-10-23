@@ -2,10 +2,9 @@ package app.czyeru.patches.tiktok.misc.playlists
 
 import app.morphe.patcher.Fingerprint
 
-/** Span count of the favorite playlists grid (2 by default). */
+/** Span count of the favorite playlists grid (2 by default); `Kp` on 47.2.41, `jq` on 47.4.3. */
 internal object CollectionListSpanCountFingerprint : Fingerprint(
     definingClass = "/CollectionListMainUIAssem;",
-    name = "Kp",
     returnType = "I",
     parameters = listOf(),
 )

@@ -775,7 +775,7 @@ public final class FeatureGateLabFragment extends Fragment {
         if (!"loaded_values".equals(imported.optString("payload_kind"))) {
             throw new IllegalArgumentException("Unsupported Feature Gate Lab export type");
         }
-        if (!FeatureGateLabStore.TARGET_VERSION.equals(imported.optString("tiktok_version"))) {
+        if (!FeatureGateLabStore.targetVersion().equals(imported.optString("tiktok_version"))) {
             throw new IllegalArgumentException("Loaded values target a different TikTok version");
         }
 
@@ -814,7 +814,7 @@ public final class FeatureGateLabFragment extends Fragment {
         JSONObject profile = new JSONObject();
         profile.put("schema", 1);
         profile.put("target", "TikTok global");
-        profile.put("tiktok_version", FeatureGateLabStore.TARGET_VERSION);
+        profile.put("tiktok_version", FeatureGateLabStore.targetVersion());
         profile.put("rules", candidates);
         FeatureGateLabStore.ImportReview review = FeatureGateLabStore.reviewProfile(
                 profile.toString(), currentSnapshot.byIdentity);
@@ -876,7 +876,7 @@ public final class FeatureGateLabFragment extends Fragment {
         root.put("schema", 1);
         root.put("payload_kind", "loaded_values");
         root.put("target", "TikTok global");
-        root.put("tiktok_version", FeatureGateLabStore.TARGET_VERSION);
+        root.put("tiktok_version", FeatureGateLabStore.targetVersion());
         root.put("exported_at_ms", System.currentTimeMillis());
         root.put("entry_count", rules.length());
         root.put("rules", rules);

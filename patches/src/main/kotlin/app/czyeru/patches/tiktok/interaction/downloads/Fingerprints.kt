@@ -32,7 +32,7 @@ internal object AclCommonShare3Fingerprint : Fingerprint(
 )
 
 internal object VideoDownloadUriFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     name = "LIZLLL",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
@@ -56,6 +56,11 @@ internal object CommentImageWatermarkFingerprint : Fingerprint(
     returnType = "V",
 )
 
+/**
+ * The comment sticker preview view's bind method (`X.0I8Y.LIZ` on 47.2.41, `X.17WZ.LIZ` on 47.4.3):
+ * a LinearLayout that reads its model's UrlModel, hands it to the static image loader and binds
+ * its action buttons through a two-argument method of its own.
+ */
 internal object StickerPreviewBinderFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf(
@@ -64,50 +69,53 @@ internal object StickerPreviewBinderFingerprint : Fingerprint(
         "Ljava/lang/String;",
         "Ljava/util/Map;",
     ),
-    custom = { method, classDef ->
-        if (!classDef.endsWith("/0I8Y;") || method.name != "LIZ") {
-            false
-        } else {
-            val instructions = method.implementation?.instructions
-            if (instructions == null) {
-                false
-            } else {
-                var readsUrlModel = false
-                var bindsActionButton = false
-                var loadsStickerImage = false
+    custom = custom@{ method, classDef ->
+        if (classDef.superclass != "Landroid/widget/LinearLayout;") return@custom false
+        val instructions = method.implementation?.instructions ?: return@custom false
+        var readsUrlModel = false
+        var bindsActionButton = false
+        var loadsStickerImage = false
 
-                instructions.forEach { instruction ->
-                    instruction.getReference<FieldReference>()?.let { field ->
-                        if (field.type == "Lcom/ss/android/ugc/aweme/base/model/UrlModel;") {
-                            readsUrlModel = true
-                        }
-                    }
+        instructions.forEach { instruction ->
+            instruction.getReference<FieldReference>()?.let { field ->
+                if (field.type == "Lcom/ss/android/ugc/aweme/base/model/UrlModel;") {
+                    readsUrlModel = true
+                }
+            }
 
-                    instruction.getReference<MethodReference>()?.let { methodReference ->
-                        if (methodReference.definingClass == "LX/0I8Y;" &&
-                            methodReference.name == "LIZIZ" &&
-                            methodReference.parameterTypes == listOf("LX/0HLX;", "LX/0I8b;") &&
-                            methodReference.returnType == "V"
-                        ) {
-                            bindsActionButton = true
-                        }
-
-                        if (methodReference.definingClass == "LX/17J6;" &&
-                            methodReference.name == "LIZJ"
-                        ) {
-                            loadsStickerImage = true
-                        }
-                    }
+            instruction.getReference<MethodReference>()?.let { methodReference ->
+                if (methodReference.definingClass == classDef.type &&
+                    methodReference.parameterTypes.size == 2 &&
+                    methodReference.returnType == "V"
+                ) {
+                    bindsActionButton = true
                 }
 
-                readsUrlModel && bindsActionButton && loadsStickerImage
+                if (methodReference.parameterTypes.getOrNull(1) == "Lcom/ss/android/ugc/aweme/base/model/UrlModel;" &&
+                    methodReference.parameterTypes.size > 10
+                ) {
+                    loadsStickerImage = true
+                }
             }
         }
+
+        readsUrlModel && bindsActionButton && loadsStickerImage
     },
 )
 
+/**
+ * TikTok's MediaStore helper (`X.0V4z` on 47.2.41, `X.01BZ` on 47.4.3). Its method names are the
+ * same on both builds; only the class is renamed, so it is found by the photo lookup's query.
+ */
+internal object MediaStoreHelperFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    returnType = "Landroid/net/Uri;",
+    parameters = listOf("Landroid/content/Context;", "Ljava/lang/String;", "Ljava/lang/String;"),
+    strings = listOf("image/*", "(relative_path=? OR relative_path=?) AND _display_name=?"),
+)
+
 internal object PhotoDownloadUriFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     name = "LIZIZ",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
@@ -116,7 +124,7 @@ internal object PhotoDownloadUriFingerprint : Fingerprint(
 )
 
 internal object VideoLookupUriFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     name = "LJIIIIZZ",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
@@ -125,7 +133,7 @@ internal object VideoLookupUriFingerprint : Fingerprint(
 )
 
 internal object PhotoLookupUriFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     name = "LJFF",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
@@ -134,7 +142,7 @@ internal object PhotoLookupUriFingerprint : Fingerprint(
 )
 
 internal object VideoMediaStoreInsertFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
     parameters = listOf(
@@ -154,7 +162,7 @@ internal object VideoMediaStoreInsertFingerprint : Fingerprint(
 )
 
 internal object PhotoMediaStoreInsertFingerprint : Fingerprint(
-    definingClass = "/0V4z;",
+    classFingerprint = MediaStoreHelperFingerprint,
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
     parameters = listOf(
@@ -173,8 +181,8 @@ internal object PhotoMediaStoreInsertFingerprint : Fingerprint(
     },
 )
 
+/** `X.0VPx.LJJIJIIJIL` on 47.2.41, `X.03rb.LJJIJIIJIL` on 47.4.3. */
 internal object ImagePostMediaCopyFingerprint : Fingerprint(
-    definingClass = "/0VPx;",
     name = "LJJIJIIJIL",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "Landroid/net/Uri;",
@@ -191,8 +199,9 @@ internal object ImagePostMediaCopyFingerprint : Fingerprint(
         val calls = method.implementation?.instructions?.mapNotNull { instruction ->
             instruction.getReference<MethodReference>()
         } ?: emptyList()
-        calls.any { it.definingClass == "LX/0V4z;" && it.name == "LJ" } &&
-            calls.any { it.definingClass == "LX/0V4z;" && it.name == "LIZJ" }
+        // The MediaStore helper's video and photo inserts.
+        calls.any { it.name == "LJ" && it.returnType == "Landroid/net/Uri;" && it.parameterTypes.size == 4 } &&
+            calls.any { it.name == "LIZJ" && it.returnType == "Landroid/net/Uri;" && it.parameterTypes.size == 4 }
     },
 )
 
@@ -209,22 +218,11 @@ internal object StickerPreviewSourceFingerprint : Fingerprint(
         "Lkotlin/jvm/functions/Function0;",
         "Lkotlin/jvm/functions/Function0;",
     ),
-    custom = { method, classDef ->
-        classDef.endsWith("/0IKC;") &&
-            method.name == "LJ" &&
-            method.implementation?.instructions?.any { instruction ->
-                instruction.getReference<MethodReference>()?.let { reference ->
-                    reference.definingClass == "LX/0I8Y;" &&
-                        reference.name == "LIZ" &&
-                        reference.parameterTypes == listOf(
-                            "LX/0I8c;",
-                            "Z",
-                            "Ljava/lang/String;",
-                            "Ljava/util/Map;",
-                        ) &&
-                        reference.returnType == "V"
-                } == true
-            } == true
+    // `X.0IKC.LJ` on 47.2.41, `X.17WX.LJ` on 47.4.3; it hands the preview model to the binder.
+    custom = { method, _ ->
+        method.implementation?.instructions?.any { instruction ->
+            instruction.getReference<MethodReference>()?.let(::isStickerPreviewBindCall) == true
+        } == true
     },
 )
 
@@ -239,3 +237,10 @@ internal object DownloadSuccessCoroutineFingerprint : Fingerprint(
     custom = { method, _ -> method.name == "invokeSuspend" },
 )
 
+
+/** A call shaped like [StickerPreviewBinderFingerprint]: `(model, boolean, String, Map)V`. */
+internal fun isStickerPreviewBindCall(reference: MethodReference) =
+    reference.returnType == "V" &&
+        reference.parameterTypes.size == 4 &&
+        reference.parameterTypes[0].startsWith("L") &&
+        reference.parameterTypes.drop(1).map(CharSequence::toString) == listOf("Z", "Ljava/lang/String;", "Ljava/util/Map;")

@@ -1,6 +1,10 @@
 package app.czyeru.patches.tiktok.misc.navigation
 
+import app.czyeru.util.getReference
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 /**
  * Static writer that stores the top tab node list (used by the tab strip and the
@@ -10,7 +14,8 @@ import app.morphe.patcher.Fingerprint
  */
 internal object TopTabListsWriterFingerprint : Fingerprint(
     definingClass = "/TabAbilityAssem;",
-    name = "fp",
+    // `fp` on 47.2.41, `Ip` on 47.4.3: the only static writer that takes the assem and both lists.
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
     returnType = "V",
     parameters = listOf(
         "Lcom/ss/android/ugc/aweme/main/assems/tabs/TabAbilityAssem;",
@@ -20,9 +25,14 @@ internal object TopTabListsWriterFingerprint : Fingerprint(
     ),
 )
 
+/** `OB` on 47.2.41, `EB` on 47.4.3: the bottom tab list getter, the one that reads `BOTTOM_TAB`. */
 internal object BottomTabModelListFingerprint : Fingerprint(
     definingClass = "/TabAbilityAssem;",
-    name = "OB",
     returnType = "Ljava/util/List;",
     parameters = listOf(),
+    custom = { method, _ ->
+        method.implementation?.instructions?.any {
+            it.opcode == Opcode.SGET_OBJECT && it.getReference<FieldReference>()?.name == "BOTTOM_TAB"
+        } == true
+    },
 )
