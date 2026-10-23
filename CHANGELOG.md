@@ -1,3 +1,9 @@
+## [1.7.7](https://github.com/LuckyToShine/czyeru/compare/v1.7.6...v1.7.7) (2026-10-23)
+
+### 🚀 Updated App Support
+
+* **tiktok:** support TikTok 47.4.3 alongside 47.2.41 ([0b6e584](https://github.com/LuckyToShine/czyeru/commit/0b6e584a420d71640397cef7df0157b3ffeb1bb6))
+
 ## [1.7.6](https://github.com/LuckyToShine/czyeru/compare/v1.7.5...v1.7.6) (2026-10-19)
 
 ### 🐛 Bug Fixes
