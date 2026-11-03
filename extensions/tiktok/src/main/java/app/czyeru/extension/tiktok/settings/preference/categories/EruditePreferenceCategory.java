@@ -25,7 +25,8 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
                 || SettingsStatus.keepCollectionsLoadedEnabled
                 || SettingsStatus.collectionSortEnabled
                 || SettingsStatus.collectionVideosSearchEnabled
-                || SettingsStatus.inboxActivitySearchEnabled;
+                || SettingsStatus.inboxActivitySearchEnabled
+                || SettingsStatus.favoritesRetryEnabled;
     }
 
     @Override
@@ -77,6 +78,16 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
                     "Add a search bar to the Activity notifications and New followers tabs to filter "
                             + "by user, comment, or notification text.",
                     Settings.INBOX_ACTIVITY_SEARCH
+            ));
+        }
+        if (SettingsStatus.favoritesRetryEnabled) {
+            addPreference(group(context, "Favorites"));
+            addPreference(new TogglePreference(
+                    context,
+                    "Retry favorites refused as too fast",
+                    "When TikTok says \"You're adding to Favorites too fast\", keep the video in a queue "
+                            + "and save it automatically once TikTok allows it again, also after a restart.",
+                    Settings.FAVORITES_RETRY
             ));
         }
     }
