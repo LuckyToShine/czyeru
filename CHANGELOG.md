@@ -1,3 +1,9 @@
+## [1.9.2](https://github.com/LuckyToShine/czyeru/compare/v1.9.1...v1.9.2) (2026-11-03)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** port Hushfeed feed, comment and gesture patches ([110f6ae](https://github.com/LuckyToShine/czyeru/commit/110f6ae58edcaf2e55a9fe2577f5c811084b6b04))
+
 ## [1.9.1](https://github.com/LuckyToShine/czyeru/compare/v1.9.0...v1.9.1) (2026-11-03)
 
 ### 🐛 Bug Fixes
