@@ -333,6 +333,7 @@ public class TikTokPreferenceFragment extends AbstractPreferenceFragment {
                     SettingsStatus.favoritePlaylistGridEnabled && Settings.FAVORITE_PLAYLIST_GRID.get(),
                     SettingsStatus.favoritePlaylistSearchEnabled && Settings.FAVORITE_PLAYLIST_SEARCH.get(),
                     SettingsStatus.likedVideosSearchEnabled && Settings.LIKED_VIDEOS_SEARCH.get(),
+                    SettingsStatus.likedVideosServerSearchEnabled && Settings.LIKED_VIDEOS_SERVER_SEARCH.get(),
                     SettingsStatus.chooseCollectionSearchEnabled && Settings.CHOOSE_COLLECTION_SEARCH.get(),
                     SettingsStatus.keepCollectionsLoadedEnabled && Settings.KEEP_COLLECTIONS_LOADED.get(),
                     SettingsStatus.collectionSortEnabled && !"normal".equals(Settings.COLLECTION_SORT.get()),

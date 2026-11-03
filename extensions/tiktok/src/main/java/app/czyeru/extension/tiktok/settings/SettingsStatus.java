@@ -40,6 +40,7 @@ public class SettingsStatus {
     public static boolean favoritePlaylistGridEnabled = false;
     public static boolean favoritePlaylistSearchEnabled = false;
     public static boolean likedVideosSearchEnabled = false;
+    public static boolean likedVideosServerSearchEnabled = false;
     public static boolean chooseCollectionSearchEnabled = false;
     public static boolean keepCollectionsLoadedEnabled = false;
     public static boolean collectionSortEnabled = false;
@@ -186,6 +187,10 @@ public class SettingsStatus {
 
     public static void enableLikedVideosSearch() {
         likedVideosSearchEnabled = true;
+    }
+
+    public static void enableLikedVideosServerSearch() {
+        likedVideosServerSearchEnabled = true;
     }
 
     public static void enableChooseCollectionSearch() {

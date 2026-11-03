@@ -199,6 +199,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting FAVORITE_PLAYLIST_GRID = new BooleanSetting("favorite_playlist_grid", FALSE, true);
     public static final BooleanSetting FAVORITE_PLAYLIST_SEARCH = new BooleanSetting("favorite_playlist_search", FALSE, true);
     public static final BooleanSetting LIKED_VIDEOS_SEARCH = new BooleanSetting("liked_videos_search", FALSE, true);
+    public static final BooleanSetting LIKED_VIDEOS_SERVER_SEARCH = new BooleanSetting("liked_videos_server_search", TRUE, true);
     public static final BooleanSetting CHOOSE_COLLECTION_SEARCH = new BooleanSetting("choose_collection_search", FALSE, true);
     public static final BooleanSetting KEEP_COLLECTIONS_LOADED = new BooleanSetting("keep_collections_loaded", FALSE);
     public static final StringSetting COLLECTION_SORT = new StringSetting("collection_sort", "normal");

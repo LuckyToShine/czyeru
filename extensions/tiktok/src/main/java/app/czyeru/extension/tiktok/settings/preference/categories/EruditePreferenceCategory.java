@@ -38,10 +38,21 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
             addPreference(new TogglePreference(
                     context,
                     "Liked videos search bar",
-                    "Add a search bar to the liked videos page to filter loaded videos by description "
-                            + "or creator. Requires restart.",
+                    "Add a search bar to the liked videos page to filter videos by description "
+                            + "or creator. The remaining pages load while you search. Requires restart.",
                     Settings.LIKED_VIDEOS_SEARCH
             ));
+            if (SettingsStatus.likedVideosServerSearchEnabled) {
+                addPreference(new TogglePreference(
+                        context,
+                        "Server search (V2, experimental)",
+                        "Also ask TikTok's server for liked videos that match, so videos that have not "
+                                + "loaded yet show up right away. Uses a guessed server option; if the "
+                                + "server does not return your liked videos, the search works as V1. "
+                                + "Needs the search bar on. Requires restart.",
+                        Settings.LIKED_VIDEOS_SERVER_SEARCH
+                ));
+            }
         }
         if (SettingsStatus.chooseCollectionSearchEnabled) {
             addPreference(group(context, "Save to collection"));
@@ -111,8 +122,8 @@ public final class EruditePreferenceCategory extends ConditionalPreferenceCatego
             addPreference(new TogglePreference(
                     context,
                     "Playlist search bar",
-                    "Add a search bar to the favorite playlists page to filter loaded playlists by name. "
-                            + "Requires restart.",
+                    "Add a search bar to the favorite playlists page to filter playlists by name. "
+                            + "The remaining pages load while you search. Requires restart.",
                     Settings.FAVORITE_PLAYLIST_SEARCH
             ));
         }
