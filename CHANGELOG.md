@@ -1,3 +1,9 @@
+## [1.9.3](https://github.com/LuckyToShine/czyeru/compare/v1.9.2...v1.9.3) (2026-11-03)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** support TikTok 47.6.3 ([85874c0](https://github.com/LuckyToShine/czyeru/commit/85874c057580e1d5bb8ed21a5889367ae40dea8b))
+
 ## [1.9.2](https://github.com/LuckyToShine/czyeru/compare/v1.9.1...v1.9.2) (2026-11-03)
 
 ### 🐛 Bug Fixes

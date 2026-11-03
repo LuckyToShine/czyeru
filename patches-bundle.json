@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-03T03:26:35",
-  "description": "## [1.9.2](https://github.com/LuckyToShine/czyeru/compare/v1.9.1...v1.9.2) (2026-11-03)\n\n### 🐛 Bug Fixes\n\n* **tiktok:** port Hushfeed feed, comment and gesture patches ([110f6ae](https://github.com/LuckyToShine/czyeru/commit/110f6ae58edcaf2e55a9fe2577f5c811084b6b04))",
-  "download_url": "https://github.com/LuckyToShine/czyeru/releases/download/v1.9.2/patches-1.9.2.mpp",
+  "created_at": "2026-11-03T03:52:45",
+  "description": "## [1.9.3](https://github.com/LuckyToShine/czyeru/compare/v1.9.2...v1.9.3) (2026-11-03)\n\n### 🐛 Bug Fixes\n\n* **tiktok:** support TikTok 47.6.3 ([85874c0](https://github.com/LuckyToShine/czyeru/commit/85874c057580e1d5bb8ed21a5889367ae40dea8b))",
+  "download_url": "https://github.com/LuckyToShine/czyeru/releases/download/v1.9.3/patches-1.9.3.mpp",
   "signature_download_url": "",
-  "version": "1.9.2"
+  "version": "1.9.3"
 }
