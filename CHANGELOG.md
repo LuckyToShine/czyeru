@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/LuckyToShine/czyeru/compare/v1.9.0...v1.9.1) (2026-11-03)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** repair inbox activity search, speed up list search ([b95cb93](https://github.com/LuckyToShine/czyeru/commit/b95cb93dcbb05449cb6b175abbe2f5e4bd87a58f))
+
 ## [1.9.0](https://github.com/LuckyToShine/czyeru/compare/v1.8.1...v1.9.0) (2026-10-29)
 
 ### ✨ New Features

@@ -15,7 +15,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 ## 🩹 Patches list
 
 <!-- PATCHES_START EXPANDED -->
-> **[v1.9.0](https://github.com/LuckyToShine/czyeru/releases/tag/v1.9.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;60 patches total
+> **[v1.9.1](https://github.com/LuckyToShine/czyeru/releases/tag/v1.9.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;61 patches total
 <details open>
 <summary>📦 Conexión Lince UVM&nbsp;&nbsp;•&nbsp;&nbsp;4 patches</summary>
 <br>
@@ -50,7 +50,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 </details>
 
 <details open>
-<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;50 patches</summary>
+<summary>📦 TikTok&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -76,7 +76,7 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Enable non-personalized search](#enable-non-personalized-search) | Uses TikTok's non-personalized search mode instead of its saved account choice. |  |
 | [Enable voice comments](#enable-voice-comments) | Enables TikTok's native voice-comment recording and publishing entry points. |  |
 | [Favorite playlists grid](#favorite-playlists-grid) | Adds an option to show favorite playlists in a 3-column 8pt grid with square covers and the title and video count below. |  |
-| [Favorite playlists search](#favorite-playlists-search) | Adds an option to show a search bar on the favorite playlists page that filters loaded playlists by name. |  |
+| [Favorite playlists search V1](#favorite-playlists-search-v1) | Adds an option to show a search bar on the favorite playlists page that instantly filters your playlists by name, loading the remaining pages in the background while you search. |  |
 | [Feature Gate Lab](#feature-gate-lab) | Adds a menu for viewing and overriding supported TikTok feature flags and configuration values. |  |
 | [Feed filter](#feed-filter) | Hides feed ads, TikTok Shop items, livestreams, stories, photo posts, and videos outside configured view or like ranges. |  |
 | [Feed tab navigation](#feed-tab-navigation) | Controls which loaded top and bottom navigation tabs remain visible, blocks newly added tabs when requested, and can hide the Tako AI bubble. |  |
@@ -96,7 +96,8 @@ Click here to add these patches to Morphe: https://morphe.software/add-source?gi
 | [Hold-and-slide 2x lock](#hold-and-slide-2x-lock) | Enables TikTok's native hold, slide down, and release gesture to lock 2x speed. |  |
 | [Inbox activity search](#inbox-activity-search) | Adds an option to show a search bar on the Activity notifications and New followers pages to filter by user, comment, or notification text. |  |
 | [Keep collections loaded](#keep-collections-loaded) | Adds an option to remember every collection you have loaded, so the collections page and the save sheet show them all right away instead of loading them page by page again. |  |
-| [Liked videos search](#liked-videos-search) | Adds an option to show a search bar on the liked videos page that filters loaded videos by description or creator. |  |
+| [Liked videos search V1](#liked-videos-search-v1) | Adds an option to show a search bar on the liked videos page that instantly filters your liked videos by description or creator, loading the remaining pages in the background while you search. |  |
+| [Liked videos search V2](#liked-videos-search-v2) | Liked videos search V1 plus an experimental server search: each query also asks TikTok's server for matching liked videos, so videos that have not loaded yet show up right away. Falls back to V1 when the server does not return your liked videos. |  |
 | [Open external links directly](#open-external-links-directly) | Opens profile and story website links in the system browser instead of TikTok's in-app browser. Thanks to lyyako for the original implementation. |  |
 | [Playback speed](#playback-speed) | Enables playback-speed controls for all videos and remembers the selected speed between videos. |  |
 | [Region spoof](#region-spoof) | Adds in-app controls for changing the region TikTok reads. |  |
