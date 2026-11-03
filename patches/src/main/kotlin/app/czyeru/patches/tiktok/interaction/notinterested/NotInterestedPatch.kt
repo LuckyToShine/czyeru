@@ -33,7 +33,7 @@ val notInterestedPatch = bytecodePatch(
     name = "Not interested button",
     description = "Adds a button on videos that tells TikTok you're not interested in one " +
         "tap, so it can show you fewer like it. Starts off. Turn it on in Erudite settings > " +
-        "Feed screen.",
+        "Hushfeed features.",
 ) {
     dependsOn(settingsPatch, sharedExtensionPatch, blockAuthorPatch)
     compatibleWith(*AppCompatibilities.tiktok())

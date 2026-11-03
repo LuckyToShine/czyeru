@@ -364,7 +364,7 @@
     },
     {
       "name": "Copy bio and IDs",
-      "description": "Lets you long-press a bio to copy it, makes the @names in a bio open those profiles on a tap, and adds share sheet buttons that copy a display name, username, user ID or video ID. On a profile card inside a LIVE room, long-press the bio or the name to copy it, long-press the username for the user ID, or tap the copy mark by the username. On by default. Turn it off in Erudite settings > App.",
+      "description": "Lets you long-press a bio to copy it and adds share sheet buttons that copy a display name, username, user ID or video ID. On a profile card inside a LIVE room, long-press the bio or the name to copy it, long-press the username for the user ID, or tap the copy mark by the username. On by default. Turn it off in Erudite settings > Hushfeed features.",
       "default": true,
       "category": null,
       "dependencies": [
@@ -1073,7 +1073,7 @@
     },
     {
       "name": "Expand activity list",
-      "description": "Shows the whole Activity and New followers lists in the Inbox, so you don't have to tap View all. Starts off. Turn it on in Erudite settings > Inbox.",
+      "description": "Shows the whole Activity and New followers lists in the Inbox, so you don't have to tap View all. Starts off. Turn it on in Erudite settings > Hushfeed features.",
       "default": true,
       "category": null,
       "dependencies": [
@@ -2118,7 +2118,7 @@
     },
     {
       "name": "Keep the Favorites tab",
-      "description": "Keeps the Favorites tab and your saved videos on your profile when TikTok tries out a version of the app that hides them, and makes the collections popup you get by holding the Favorites button dark when TikTok is. Both are on by default. Turn them off in Erudite settings > App.",
+      "description": "Keeps the Favorites tab and your saved videos on your profile when TikTok tries out a version of the app that hides them, and makes the collections popup you get by holding the Favorites button dark when TikTok is. Both are on by default. Turn them off in Erudite settings > Hushfeed features.",
       "default": true,
       "category": null,
       "dependencies": [
@@ -2275,7 +2275,7 @@
     },
     {
       "name": "Not interested button",
-      "description": "Adds a button on videos that tells TikTok you're not interested in one tap, so it can show you fewer like it. Starts off. Turn it on in Erudite settings > Feed screen.",
+      "description": "Adds a button on videos that tells TikTok you're not interested in one tap, so it can show you fewer like it. Starts off. Turn it on in Erudite settings > Hushfeed features.",
       "default": true,
       "category": null,
       "dependencies": [
@@ -2717,7 +2717,7 @@
     },
     {
       "name": "Show exact counts",
-      "description": "Shows likes, comments and other counts as full numbers, like 1,234,567 instead of 1.2M. Starts off. Turn it on in Erudite settings > Feed screen.",
+      "description": "Shows likes, comments and other counts as full numbers, like 1,234,567 instead of 1.2M. Starts off. Turn it on in Erudite settings > Hushfeed features.",
       "default": true,
       "category": null,
       "dependencies": [
