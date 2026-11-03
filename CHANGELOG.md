@@ -1,3 +1,9 @@
+## [1.9.4](https://github.com/LuckyToShine/czyeru/compare/v1.9.3...v1.9.4) (2026-11-03)
+
+### 🐛 Bug Fixes
+
+* **graphify:** add code graphs of patches and repo ([c3e9652](https://github.com/LuckyToShine/czyeru/commit/c3e96523f3fd7a692eda4c5cfc073cc63eff5a23))
+
 ## [1.9.3](https://github.com/LuckyToShine/czyeru/compare/v1.9.2...v1.9.3) (2026-11-03)
 
 ### 🐛 Bug Fixes
