@@ -1,3 +1,10 @@
+## [1.9.6](https://github.com/LuckyToShine/czyeru/compare/v1.9.5...v1.9.6) (2026-11-27)
+
+### 🐛 Bug Fixes
+
+* **tiktok:** avoid key scratch overlap in Feature Gate Lab ([6213c4a](https://github.com/LuckyToShine/czyeru/commit/6213c4afd6774cbc3025ab9b565e8fc20daa27e2))
+* **tiktok:** support TikTok 48.0.2 ([8d2eca9](https://github.com/LuckyToShine/czyeru/commit/8d2eca98f360f959a68e323f2e87a8f34eb265ba))
+
 ## [1.9.5](https://github.com/LuckyToShine/czyeru/compare/v1.9.4...v1.9.5) (2026-11-04)
 
 ### 🐛 Bug Fixes
