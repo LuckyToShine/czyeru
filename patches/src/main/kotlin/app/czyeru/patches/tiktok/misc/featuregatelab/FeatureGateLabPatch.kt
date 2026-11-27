@@ -19,6 +19,11 @@ import app.czyeru.patches.tiktok.misc.absettings.appAbTypedClasses
 import app.czyeru.patches.tiktok.misc.absettings.methodsOfShape
 import app.czyeru.patches.tiktok.misc.absettings.shape
 import app.czyeru.patches.tiktok.misc.settings.settingsPatch
+import app.czyeru.patches.tiktok.shared.callThroughLocals
+import app.czyeru.patches.tiktok.shared.objectIn
+import app.czyeru.patches.tiktok.shared.valueIn
+import app.czyeru.patches.tiktok.shared.wideIn
+import app.czyeru.util.addInstructionsAtControlFlowLabel
 import app.czyeru.util.cloneMutableAndPreserveParameters
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -44,7 +49,6 @@ private data class TypedBoundary(
     val runtimeMethod: String,
     val runtimeDescriptor: String,
     val wide: Boolean = false,
-    val keyScratchRegister: String? = null,
     val isStatic: Boolean = false,
     val nameIsStable: Boolean = false,
 )
@@ -55,7 +59,7 @@ private val boundaries = listOf(
     TypedBoundary(APP_AB_DESCRIPTOR, "LIZLLL", "F", listOf("I", "Ljava/lang/String;", "Z", "F"), "p2", Opcode.RETURN, "overrideFloat", "(Ljava/lang/String;F)F"),
     TypedBoundary(APP_AB_DESCRIPTOR, APP_AB_INT_METHOD, "I", APP_AB_INT_PARAMETERS, APP_AB_INT_KEY_REGISTER, Opcode.RETURN, "overrideInt", "(Ljava/lang/String;I)I"),
     TypedBoundary(APP_AB_DESCRIPTOR, "LJII", "J", listOf("I", "J", "Ljava/lang/String;", "Z"), "p4", Opcode.RETURN_WIDE, "overrideLong", "(Ljava/lang/String;J)J", true),
-    TypedBoundary(APP_AB_DESCRIPTOR, "LJIIIIZZ", "Ljava/lang/String;", listOf("I", "Ljava/lang/String;", "Ljava/lang/String;", "Z"), "p2", Opcode.RETURN_OBJECT, "overrideString", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", keyScratchRegister = "v0"),
+    TypedBoundary(APP_AB_DESCRIPTOR, "LJIIIIZZ", "Ljava/lang/String;", listOf("I", "Ljava/lang/String;", "Ljava/lang/String;", "Z"), "p2", Opcode.RETURN_OBJECT, "overrideString", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
     TypedBoundary(ABMOCK_SETTINGS_MANAGER_DESCRIPTOR, "LIZ", "Z", listOf("Ljava/lang/String;", "Z"), "p0", Opcode.RETURN, "overrideBoolean", "(Ljava/lang/String;Z)Z", isStatic = true),
     TypedBoundary(ABMOCK_SETTINGS_MANAGER_DESCRIPTOR, "LIZIZ", "D", listOf("Ljava/lang/String;", "D"), "p0", Opcode.RETURN_WIDE, "overrideDouble", "(Ljava/lang/String;D)D", true, isStatic = true),
     TypedBoundary(ABMOCK_SETTINGS_MANAGER_DESCRIPTOR, "LIZJ", "F", listOf("Ljava/lang/String;", "F"), "p0", Opcode.RETURN, "overrideFloat", "(Ljava/lang/String;F)F", isStatic = true),
@@ -218,18 +222,25 @@ private fun MutableMethod.patchLiveSettingsObjectBoundary(hasClassKey: Boolean) 
             } else {
                 "\ncheck-cast v$register, $returnType"
             }
-            val hook = if (hasClassKey) {
-                """
-                    invoke-static {p1, v$register}, $RUNTIME_DESCRIPTOR->observeLiveSettingsClassObject(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register$returnCast
-                """
+            val call = if (hasClassKey) {
+                callThroughLocals(
+                    "Feature Gate Lab",
+                    "invoke-static",
+                    "$RUNTIME_DESCRIPTOR->observeLiveSettingsClassObject(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;",
+                    objectIn("p1"),
+                    objectIn("v$register"),
+                )
             } else {
-                """
-                    invoke-static {p1, p2, v$register}, $RUNTIME_DESCRIPTOR->observeLiveSettingsObject(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register$returnCast
-                """
+                callThroughLocals(
+                    "Feature Gate Lab",
+                    "invoke-static",
+                    "$RUNTIME_DESCRIPTOR->observeLiveSettingsObject(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    objectIn("p1"),
+                    objectIn("p2"),
+                    objectIn("v$register"),
+                )
             }
-            addInstructions(index, hook)
+            addInstructionsAtControlFlowLabel(index, "$call\nmove-result-object v$register$returnCast")
         }
 }
 
@@ -248,23 +259,36 @@ private fun MutableMethod.patchSettingsManagerObjectBoundary(
         }
         .asReversed()
         .forEach { (index, register) ->
-            val hook = if (hasDefault) {
-                """
-                    invoke-static {p1, p2, p3, v$register}, $RUNTIME_DESCRIPTOR->observeSettingsObject(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register
-                """
+            val call = if (hasDefault) {
+                callThroughLocals(
+                    "Feature Gate Lab",
+                    "invoke-static",
+                    "$RUNTIME_DESCRIPTOR->observeSettingsObject(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    objectIn("p1"),
+                    objectIn("p2"),
+                    objectIn("p3"),
+                    objectIn("v$register"),
+                )
             } else if (isStatic) {
-                """
-                    invoke-static {p0, p1, v$register}, $RUNTIME_DESCRIPTOR->observeSettingsObjectWithoutDefault(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register
-                """
+                callThroughLocals(
+                    "Feature Gate Lab",
+                    "invoke-static",
+                    "$RUNTIME_DESCRIPTOR->observeSettingsObjectWithoutDefault(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;",
+                    objectIn("p0"),
+                    objectIn("p1"),
+                    objectIn("v$register"),
+                )
             } else {
-                """
-                    invoke-static {p1, p2, v$register}, $RUNTIME_DESCRIPTOR->observeSettingsObjectWithoutDefault(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register
-                """
+                callThroughLocals(
+                    "Feature Gate Lab",
+                    "invoke-static",
+                    "$RUNTIME_DESCRIPTOR->observeSettingsObjectWithoutDefault(Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;",
+                    objectIn("p1"),
+                    objectIn("p2"),
+                    objectIn("v$register"),
+                )
             }
-            addInstructions(index, hook)
+            addInstructionsAtControlFlowLabel(index, "$call\nmove-result-object v$register")
         }
 }
 
@@ -280,13 +304,15 @@ private fun MutableMethod.patchPlayerSettingBoundary() {
         }
         .asReversed()
         .forEach { (index, register) ->
-            addInstructions(
-                index,
-                """
-                    invoke-static {p1, p2, v$register}, $RUNTIME_DESCRIPTOR->overridePlayerValue(Ljava/lang/String;Ljava/lang/reflect/Type;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register
-                """,
+            val call = callThroughLocals(
+                "Feature Gate Lab",
+                "invoke-static",
+                "$RUNTIME_DESCRIPTOR->overridePlayerValue(Ljava/lang/String;Ljava/lang/reflect/Type;Ljava/lang/Object;)Ljava/lang/Object;",
+                objectIn("p1"),
+                objectIn("p2"),
+                objectIn("v$register"),
             )
+            addInstructionsAtControlFlowLabel(index, "$call\nmove-result-object v$register")
         }
 }
 
@@ -302,13 +328,15 @@ private fun MutableMethod.patchRawAbBoundary() {
         }
         .asReversed()
         .forEach { (index, register) ->
-            addInstructions(
-                index,
-                """
-                    invoke-static {p1, v$register, p2}, $RUNTIME_DESCRIPTOR->overrideRawAbValue(Ljava/lang/String;Ljava/lang/Object;Z)Ljava/lang/Object;
-                    move-result-object v$register
-                """,
+            val call = callThroughLocals(
+                "Feature Gate Lab",
+                "invoke-static",
+                "$RUNTIME_DESCRIPTOR->overrideRawAbValue(Ljava/lang/String;Ljava/lang/Object;Z)Ljava/lang/Object;",
+                objectIn("p1"),
+                objectIn("v$register"),
+                valueIn("p2"),
             )
+            addInstructionsAtControlFlowLabel(index, "$call\nmove-result-object v$register")
         }
 }
 
@@ -324,10 +352,10 @@ private fun MutableMethod.patchActivityCenterSchema() {
         }
         .asReversed()
         .forEach { (index, register) ->
-            addInstructions(
+            addInstructionsAtControlFlowLabel(
                 index,
                 """
-                    invoke-static {v$register}, $RUNTIME_DESCRIPTOR->transformActivityCenterSchema(Ljava/lang/String;)Ljava/lang/String;
+                    invoke-static/range {v$register .. v$register}, $RUNTIME_DESCRIPTOR->transformActivityCenterSchema(Ljava/lang/String;)Ljava/lang/String;
                     move-result-object v$register
                 """,
             )
@@ -345,26 +373,23 @@ private fun MutableMethod.patchBoundary(boundary: TypedBoundary) {
         }
         .asReversed()
         .forEach { (index, register) ->
-            val resultRegisters = if (boundary.wide) "v$register, v${register + 1}" else "v$register"
-            val keyRegister = boundary.keyScratchRegister ?: boundary.keyParameter
-            val prepareKey = boundary.keyScratchRegister?.let {
-                if (it == "v$register") {
-                    throw PatchException("Feature Gate Lab key scratch overlaps result register: $this")
-                }
-                "move-object/from16 $it, ${boundary.keyParameter}\n"
-            }.orEmpty()
+            val result = when {
+                boundary.wide -> wideIn("v$register")
+                boundary.returnOpcode == Opcode.RETURN_OBJECT -> objectIn("v$register")
+                else -> valueIn("v$register")
+            }
+            val call = callThroughLocals(
+                "Feature Gate Lab",
+                "invoke-static",
+                "$RUNTIME_DESCRIPTOR->${boundary.runtimeMethod}${boundary.runtimeDescriptor}",
+                objectIn(boundary.keyParameter),
+                result,
+            )
             val moveResult = when (boundary.returnOpcode) {
                 Opcode.RETURN_WIDE -> "move-result-wide v$register"
                 Opcode.RETURN_OBJECT -> "move-result-object v$register"
                 else -> "move-result v$register"
             }
-            addInstructions(
-                index,
-                """
-                    $prepareKey
-                    invoke-static {$keyRegister, $resultRegisters}, $RUNTIME_DESCRIPTOR->${boundary.runtimeMethod}${boundary.runtimeDescriptor}
-                    $moveResult
-                """,
-            )
+            addInstructionsAtControlFlowLabel(index, "$call\n$moveResult")
         }
 }
